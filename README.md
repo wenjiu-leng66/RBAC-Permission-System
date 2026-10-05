@@ -2,7 +2,7 @@
 
 “有请下一组”的 OOAD 课程设计：市政公司 RBAC 权限管理系统。
 
-当前阶段：**仓库与协作准备**。已建立目录、接口草案、设计模板、协作模板和仓库检查。尚未初始化 Vue / Spring Boot 应用，尚未实现权限业务，暂时没有应用启动命令。
+当前阶段：**RBAC0 准备与界面设计**。已建立协作框架，成员 3 的角色权限交互原型及前端权限判断模块已准备。尚未初始化正式 Vue / Spring Boot 应用，尚无真实后端或业务数据联调。
 
 ## 从这里开始
 
@@ -11,6 +11,7 @@
 - 组长填写 [成员责任表](docs/planning/team.md)，按 [首次任务清单](docs/planning/first-tasks.md) 分配工作。
 - 开工前完成 [需求范围](docs/requirements/scope.md)、[待确认问题](docs/requirements/questions.md) 和 [接口约定](docs/standards/api-contract.md)。
 - 检查进度与完成标准：[阶段计划](docs/planning/milestones.md)、[验收矩阵](docs/testing/acceptance-matrix.md)。
+- 查看成员 3 的 [RBAC0 原型](frontend/prototypes/README.md) 与 [完成内容解释](docs/guides/member3-rbac0-explained.md)。
 
 ## 目录
 
@@ -25,7 +26,7 @@ docs/                     需求、UML、数据字典、计划、测试、手册
 tests/                    单元、契约、集成、端到端测试的预留位置
 deploy/                   部署说明与不含秘密的配置示例
 scripts/                  仓库结构、文档链接和文件检查
-.github/                  Issue、PR、评审责任和 CI 配置
+.github/                  Issue、PR、模块责任和 CI 配置
 ```
 
 Git 不跟踪空文件夹。源码目录中的 `.gitkeep` 只用于保留位置，正式添加源码后可删除对应占位文件。
@@ -50,10 +51,11 @@ Git 不跟踪空文件夹。源码目录中的 `.gitkeep` 只用于保留位置�
 
 ```powershell
 python scripts/check_repository.py
+node --test tests/frontend/rbac0-policy.test.cjs
 git diff --check
 ```
 
-CI 当前检查目录、UTF-8、Markdown 本地文件链接、合成样例关联及不应提交的文件。它**不代表应用能运行、业务测试通过或已成功部署**。应用初始化后再增加真正的前端构建与后端测试。
+CI 检查目录、UTF-8、Markdown 本地文件链接、合成样例关联及不应提交的文件，并运行成员 3 的前端权限判断测试。它**不代表完整应用能运行、后端业务测试通过或已成功部署**。应用初始化后再增加前端构建与后端测试。
 
 ## 数据与公开仓库
 

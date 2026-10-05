@@ -22,7 +22,7 @@ REQUIRED = [
     'tests/README.md', 'deploy/README.md', 'deploy/.env.example',
 ]
 FORBIDDEN_SUFFIXES = {'.xlsx', '.xls', '.xlsm', '.pem', '.key', '.p12', '.pfx', '.jks', '.dump', '.bak'}
-TEXT_SUFFIXES = {'.md', '.yml', '.yaml', '.json', '.py', '.csv', '.mmd', '.java', '.xml', '.properties'}
+TEXT_SUFFIXES = {'.md', '.yml', '.yaml', '.json', '.py', '.csv', '.mmd', '.java', '.xml', '.properties', '.html', '.css', '.js', '.cjs', '.mjs'}
 
 def tracked_candidates():
     result = subprocess.run(['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard'], cwd=ROOT, capture_output=True, check=True)
@@ -111,7 +111,7 @@ def main():
             print(' - ' + error)
         return 1
     print(f'Repository checks passed: {len(names)} files, {text_count} UTF-8 text files, local links and synthetic sample relationships checked.')
-    print('Scope: framework/documentation only; no frontend build or backend business tests were run.')
+    print('Scope: repository structure and files only; permission tests, application builds and backend tests are separate checks.')
     return 0
 
 if __name__ == '__main__':
