@@ -1,0 +1,27 @@
+name: Question 需求与设计问题
+description: 集中确认权限语义、接口、数据库或课程要求
+title: "[Question] "
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: 问题与来源
+      placeholder: 文件名与单元格、老师要求或现有约定
+    validations:
+      required: true
+  - type: textarea
+    id: choices
+    attributes:
+      label: 候选解释及影响
+    validations:
+      required: true
+  - type: input
+    id: confirmer
+    attributes:
+      label: 需要谁确认
+      placeholder: 老师、组长、接口提供方、数据库负责人
+  - type: textarea
+    id: outcome
+    attributes:
+      label: 确认结论及需要同步的文档
+      description: 得到结论后补充并链接相关 PR

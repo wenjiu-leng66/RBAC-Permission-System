@@ -1,0 +1,48 @@
+# Dependencies and generated output
+node_modules/
+dist/
+build/
+target/
+coverage/
+*.log
+logs/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+!**/.env.example
+application-local.yml
+application-local.yaml
+application-local.properties
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+
+# Real input data and backups
+data/raw/*
+!data/raw/.gitkeep
+*.xlsx
+*.xls
+*.xlsm
+*.dump
+*.bak
+*.sqlite
+*.sqlite3
+*.db
+*.sql.gz
+
+# Machine-specific editor and OS files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp

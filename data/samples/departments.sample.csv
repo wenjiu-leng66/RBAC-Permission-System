@@ -1,0 +1,6 @@
+name,manager_username,parent_name
+总公司,DEMO_ROOT,
+公司领导,DEMO_ROOT,总公司
+综合办公室,DEMO000001,总公司
+道路工程分公司,DEMO000003,总公司
+道路工程分公司-财务部,DEMO000002,道路工程分公司

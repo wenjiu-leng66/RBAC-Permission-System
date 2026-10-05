@@ -1,0 +1,46 @@
+name: Task 任务
+description: 为一个可交付的小任务约定负责人、依赖与完成标准
+title: "[Task] "
+body:
+  - type: input
+    id: owner
+    attributes:
+      label: 主责成员与评审人
+      placeholder: 成员 2；评审成员 3（再在 Assignees 中选择真实账号）
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: 阶段
+      options:
+        - 仓库与需求准备
+        - RBAC0
+        - RBAC1
+        - 约束与最终验收
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: 目标与交付物
+      placeholder: 谁需要这个产物？完成后能做什么？涉及哪些文件？
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: 依赖、接口与需求依据
+      placeholder: 关联 Issue、接口、设计文档；未确认规则需要说明
+  - type: input
+    id: due
+    attributes:
+      label: 内部截止日期
+      placeholder: YYYY-MM-DD
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 完成标准与验证
+      placeholder: 写可以检查的行为或文档要求，不写“代码完成”
+    validations:
+      required: true

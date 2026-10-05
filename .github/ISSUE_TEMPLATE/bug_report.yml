@@ -1,0 +1,39 @@
+name: Bug 缺陷
+description: 记录可复现的功能、权限、数据或协作问题
+title: "[Bug] "
+body:
+  - type: input
+    id: version
+    attributes:
+      label: 版本、分支或提交 SHA
+      placeholder: 同时注明使用哪套后端
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 前置条件与复现步骤
+      placeholder: 用脱敏账号描述角色、数据准备、请求和操作顺序
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期结果与依据
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果与证据
+      description: 日志和截图先隐藏电话、密码、Cookie、令牌及密钥
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 影响
+      options:
+        - 阻断验收或出现越权
+        - 主要功能异常
+        - 一般功能或文档问题
