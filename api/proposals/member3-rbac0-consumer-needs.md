@@ -1,7 +1,8 @@
 # 成员 3：RBAC0 前端 API 使用方需求提案
 
-作者：杨昕桐（成员 3）  
-关联：[Issue #4](https://github.com/wenjiu-leng66/RBAC-Permission-System/issues/4)、[交互设计](../../docs/design/member3-rbac0-design.md)  
+作者：杨昕桐（成员 3）
+
+关联：[Issue #4](https://github.com/wenjiu-leng66/RBAC-Permission-System/issues/4)、[交互设计](../../docs/design/member3-rbac0-design.md)
 状态：**提案，待成员 4、6 及相关成员确认。没有声称双方已签约，也没有修改权威 [openapi.yaml](../openapi.yaml)。** 当前权威契约 `paths` 为空。
 
 ## 1. 目的与消费边界

@@ -1,8 +1,10 @@
 # 成员 3 第一阶段：RBAC0 角色权限交互设计
 
-作者：杨昕桐（成员 3，前端 B）  
-阶段：2026 年 10 月 5 日起的准备阶段；对应第一阶段 RBAC0，课程验收窗口为 10 月 27—29 日  
-任务：GitHub [Issue #4](https://github.com/wenjiu-leng66/RBAC-Permission-System/issues/4)  
+作者：杨昕桐（成员 3，前端 B）
+
+阶段：2026 年 10 月 5 日起的准备阶段；对应第一阶段 RBAC0，课程验收窗口为 10 月 27—29 日
+
+任务：GitHub [Issue #4](https://github.com/wenjiu-leng66/RBAC-Permission-System/issues/4)
 状态：成员 3 设计与交互原型交付；真实后端联调、正式接口契约和课程验收仍待完成。
 
 ## 1. 我负责什么，为什么先做这些
