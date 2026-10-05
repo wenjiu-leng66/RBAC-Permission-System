@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>市政权限工作台 · RBAC0 交互原型</title>
+  <link rel="stylesheet" href="member3-rbac0.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">市</span><div><strong>市政权限工作台</strong><small>RBAC0 · 课程设计</small></div></div>
+      <p class="nav-caption">权限维护</p>
+      <nav id="management-nav"></nav>
+      <p class="nav-caption">应用示例</p>
+      <nav id="business-nav"></nav>
+      <div class="sidebar-note"><span class="status-dot"></span>交互原型<br><span>合成数据 · 未连接后端</span></div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <span class="environment">本地演示</span>
+        <div class="identity-controls"><label for="identity">当前身份</label><select id="identity"></select><span id="session-label" class="session-label"></span></div>
+      </header>
+      <main id="main" tabindex="-1"></main>
+      <footer class="demo-tools">
+        <details>
+          <summary>演示与帮助</summary>
+          <div class="demo-tool-content">
+            <div class="tool-row"><label for="scenario">演示状态</label><select id="scenario"><option value="normal">正常数据</option><option value="empty">空列表</option><option value="loading">加载中</option><option value="save-error">保存失败</option><option value="conflict">版本冲突</option></select><button id="reset-demo" class="button secondary">重置演示数据</button></div>
+            <p>所有授权仅保存在本页内存，刷新或重置后恢复。状态切换不会删除已保存授权。可修改地址栏为 <code>#/roles</code> 或 <code>#/assignments</code>，验证直接访问受限页面。</p>
+            <p>角色授权与用户角色分配使用完整列表替换；多个角色的权限取并集。当前原型仅实现 RBAC0，职位高低不代表角色继承。真实权限应由后端再次校验。</p>
+          </div>
+        </details>
+      </footer>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script src="../src/authorization/rbac0-policy.js"></script>
+  <script src="member3-rbac0.js"></script>
+</body>
+</html>

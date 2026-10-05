@@ -25,5 +25,11 @@ jobs:
           persist-credentials: false
       - name: Check repository framework and local documentation links
         run: python3 scripts/check_repository.py
+      - name: Set up Node.js for frontend permission tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test RBAC0 frontend permission decisions
+        run: node --test tests/frontend/rbac0-policy.test.cjs
       - name: Check whitespace in the commit
         run: git show --format= --check HEAD
