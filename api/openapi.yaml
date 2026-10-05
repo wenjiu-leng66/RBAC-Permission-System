@@ -1,0 +1,6 @@
+openapi: 3.0.3
+info:
+  title: RBAC Permission System API
+  version: 0.0.0-draft
+  description: 仓库准备阶段的接口契约占位。paths 为空，尚无实现或正式确定的接口。
+paths: {}
