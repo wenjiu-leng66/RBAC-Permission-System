@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { auth, logout } from './stores/auth'
+import { visibleNavigation } from './policy-adapter'
 
 const route = useRoute(); const router = useRouter()
 const isLogin = computed(() => route.path === '/login')
@@ -12,7 +13,7 @@ const navItems = [
   { path: '/departments', label: '部门架构', permission: 'rbac:department:read' },
   { path: '/roles', label: '角色权限', permission: 'rbac:role:read' }
 ]
-const visibleNav = computed(() => navItems.filter(item => !item.permission || auth.permissions.includes(item.permission)))
+const visibleNav = computed(() => visibleNavigation(auth, navItems))
 async function signOut() {
   await ElMessageBox.confirm('确定退出当前账号吗？', '退出登录', { type: 'warning' })
   logout(); ElMessage.success('已退出登录'); router.push('/login')
