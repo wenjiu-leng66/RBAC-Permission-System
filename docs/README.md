@@ -3,9 +3,9 @@
 | 类别 | 文件 |
 | --- | --- |
 | 需求 | [需求规格说明书](requirements/req-spec.md) |
-| 设计 | [结构化设计](design/structured-design.md)、[后端详细设计](design/detailed-design.md)、[界面原型说明](design/stage1-ui-prototype.md) |
-| 模型 | [UML图集](uml/README.md)、[数据库设计](database/database-design.md) |
-| 接口 | [OpenAPI](../api/openapi.yaml)、[接口与权限约定](standards/api-contract.md) |
+| 设计 | [结构化设计](design/structured-design.md)、[后端详细设计（AsciiDoc）](design/detailed-design.adoc)、[界面原型说明](design/stage1-ui-prototype.md) |
+| 模型 | [UML图集](uml/README.md)、[数据库设计（AsciiDoc）](database/database-design.adoc) |
+| 接口 | [Apifox 文档](https://7u8ub108r6.apifox.cn/)、[OpenAPI 契约](../api/openapi.yaml)、[接口与权限约定](standards/api-contract.md) |
 | 数据 | [数据字典](database/data-dictionary.md)、[导入规则](database/import-rules.md)、[数据库操作](../database/README.md) |
 | 运行 | [环境约定](standards/environment.md)、[部署与恢复](../deploy/README.md) |
 | 质量 | [验收入口](stage1/README.md)、[执行步骤](stage1/self-test.md)、[41 条需求覆盖](stage1/requirement-coverage.md)、[执行记录](stage1/verification-record.md)、[2026-10-27 测试报告](testing/test-report-2026-10-27.md)、[验收矩阵](testing/acceptance-matrix.md) |

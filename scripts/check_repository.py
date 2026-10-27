@@ -15,7 +15,8 @@ REQUIRED = [
     'database/seeds/import_excel.py', 'data/README.md', 'data/raw/.gitkeep',
     'docs/README.md', 'docs/planning/team.md', 'docs/planning/milestones.md',
     'docs/requirements/req-spec.md', 'docs/design/structured-design.md',
-    'docs/design/detailed-design.md', 'docs/database/data-dictionary.md',
+    'docs/design/detailed-design.adoc', 'docs/database/database-design.adoc',
+    'docs/database/data-dictionary.md',
     'docs/database/import-rules.md', 'docs/standards/api-contract.md',
     'docs/stage1/README.md', 'docs/stage1/self-test.md',
     'docs/stage1/requirement-coverage.md', 'docs/stage1/verification-record.md',
@@ -23,7 +24,7 @@ REQUIRED = [
     'deploy/README.md', 'deploy/.env.example',
 ]
 FORBIDDEN_SUFFIXES = {'.xlsx', '.xls', '.xlsm', '.pem', '.key', '.p12', '.pfx', '.jks', '.dump', '.bak'}
-TEXT_SUFFIXES = {'.md', '.yml', '.yaml', '.json', '.py', '.csv', '.mmd', '.java', '.xml', '.properties', '.html', '.css', '.js', '.cjs', '.mjs', '.ps1'}
+TEXT_SUFFIXES = {'.md', '.adoc', '.yml', '.yaml', '.json', '.py', '.csv', '.mmd', '.java', '.xml', '.properties', '.html', '.css', '.js', '.cjs', '.mjs', '.ps1'}
 
 def tracked_candidates():
     result = subprocess.run(['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard'], cwd=ROOT, capture_output=True, check=True)
@@ -39,6 +40,19 @@ def markdown_links(path, text, errors):
             continue
         for match in re.finditer(r'(?<!!)\[[^\]]+\]\(([^\s)]+)(?:\s+"[^"]*")?\)', line):
             target = match.group(1).strip('<>')
+            parts = urlsplit(target)
+            if parts.scheme or parts.netloc or not parts.path:
+                continue
+            resolved = (path.parent / unquote(parts.path)).resolve()
+            if not resolved.is_relative_to(ROOT):
+                errors.append(f'{path.relative_to(ROOT)}:{line_number}: link leaves repository: {target}')
+            elif not resolved.exists():
+                errors.append(f'{path.relative_to(ROOT)}:{line_number}: missing local link: {target}')
+
+def asciidoc_links(path, text, errors):
+    for line_number, line in enumerate(text.splitlines(), 1):
+        for match in re.finditer(r'(?<![A-Za-z])link:([^\s\[]+)\[', line):
+            target = match.group(1)
             parts = urlsplit(target)
             if parts.scheme or parts.netloc or not parts.path:
                 continue
@@ -104,6 +118,8 @@ def main():
                 errors.append(f'Unresolved conflict marker found: {name}')
             if path.suffix == '.md':
                 markdown_links(path, text, errors)
+            elif path.suffix == '.adoc':
+                asciidoc_links(path, text, errors)
     if all((ROOT / name).exists() for name in ['data/samples/users.sample.csv', 'data/samples/departments.sample.csv']):
         sample_data(errors)
     if errors:

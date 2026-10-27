@@ -13,7 +13,7 @@
 
 ## 发布入口
 
-[服务器 Swagger UI](http://124.70.42.35:8080/swagger-ui/index.html?url=/api-design/openapi.yaml) 加载静态契约；`/api-design/openapi.yaml` 发布该文件，`/v3/api-docs` 为运行后端生成的接口文档。
+API 文档由 [Apifox 公开文档](https://7u8ub108r6.apifox.cn/)统一展示；现场接口调试使用[服务器 Swagger UI](http://124.70.42.35:8080/swagger-ui/index.html?url=/api-design/openapi.yaml) 加载静态契约；`/api-design/openapi.yaml` 发布该文件，`/v3/api-docs` 为运行后端生成的接口文档。
 
 ```bash
 python -m pip install -r scripts/requirements-validation.txt

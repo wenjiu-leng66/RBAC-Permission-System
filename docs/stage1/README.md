@@ -10,7 +10,7 @@
 | --- | --- |
 | 界面原型 | 应用可运行，按不同身份检查页面、权限状态及关键操作 |
 | 服务器后端 | 部署实例就绪，能够登录并调用真实业务 API |
-| 指定 API 入口 | [Swagger UI](http://124.70.42.35:8080/swagger-ui/index.html?url=/api-design/openapi.yaml) 可打开，加载统一契约，现场执行允许和拒绝请求 |
+| 指定 API 入口 | [Apifox API 文档](https://7u8ub108r6.apifox.cn/)用于文档展示，[Swagger UI](http://124.70.42.35:8080/swagger-ui/index.html?url=/api-design/openapi.yaml)用于现场调试，执行允许和拒绝请求 |
 | 分层单元测试 | 现场执行后端各层测试，说明隔离边界、输入及断言，并核对集成测试结果 |
 | 覆盖率 | 现场生成并查看 JaCoCo 报告，记录行/分支覆盖率和未覆盖的重要分支 |
 
@@ -19,11 +19,12 @@
 助教准入后，教师检查以结构化需求与设计为主，不重复界面演示：
 
 1. [需求规格](../requirements/req-spec.md)：参与者、边界、41 条一期需求及非功能要求。
-2. [结构化设计](../design/structured-design.md)：上下文、数据流、功能分解、模块调用与数据设计。
-3. [详细设计](../design/detailed-design.md)：认证、权限/范围、保护、事务和并发规则。
-4. [API 契约](../../api/openapi.yaml)：设计条目与真实控制器、返回字段和错误语义的对应。
-5. [测试](../../tests/README.md)：分层单元测试、API 集成、真实 HTTP 及覆盖率，按需求定位代码与断言。
-6. [小组分工](../planning/team.md)：六位成员的责任与交付。
+2. [结构化设计](../design/structured-design.md)：上下文、数据流、功能分解与模块调用。
+3. [数据库设计（AsciiDoc）](../database/database-design.adoc)：实体关系、约束、删除行为、事务和迁移。
+4. [详细设计（AsciiDoc）](../design/detailed-design.adoc)：认证、权限/范围、保护、事务和并发规则。
+5. [API 契约](../../api/openapi.yaml)：设计条目与真实控制器、返回字段和错误语义的对应。
+6. [测试](../../tests/README.md)：分层单元测试、API 集成、真实 HTTP 及覆盖率，按需求定位代码与断言。
+7. [小组分工](../planning/team.md)：六位成员的责任与交付。
 
 ## 执行与状态
 

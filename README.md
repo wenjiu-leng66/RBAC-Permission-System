@@ -6,7 +6,7 @@
 
 ## 运行与接口
 
-服务器 API：[Swagger UI](http://124.70.42.35:8080/swagger-ui/index.html?url=/api-design/openapi.yaml)。[界面原型](http://124.70.42.35:8080/)、[OpenAPI 文件](http://124.70.42.35:8080/api-design/openapi.yaml)、[健康检查](http://124.70.42.35:8080/api/v1/health)。
+API 文档（Apifox）：[公开接口文档](https://7u8ub108r6.apifox.cn/)。在线调试（Swagger）：[服务器 Swagger UI](http://124.70.42.35:8080/swagger-ui/index.html?url=/api-design/openapi.yaml)。[界面原型](http://124.70.42.35:8080/)、[OpenAPI 文件](http://124.70.42.35:8080/api-design/openapi.yaml)、[健康检查](http://124.70.42.35:8080/api/v1/health)。
 
 2026-10-27 已核对服务器健康、静态契约、运行接口文档及首页的只读访问；登录业务调用、部署源码版本和重启持久化的核验状态见[验收记录](docs/stage1/verification-record.md)。界面原型使用合成内存数据，真实后端使用 Cookie 会话和数据库，两者分别验收。
 
@@ -42,8 +42,8 @@ sh scripts/deploy-stage1.sh
 | --- | --- |
 | [需求规格](docs/requirements/req-spec.md) | 功能范围、业务规则及非功能要求 |
 | [结构化设计](docs/design/structured-design.md) | 需求到模块、数据流、调用层次及测试的映射 |
-| [模型图集](docs/uml/README.md)、[数据库设计](docs/database/database-design.md) | 业务概念、模块、序列、状态、活动及数据库约束 |
-| [后端详细设计](docs/design/detailed-design.md) | 认证、范围、保护规则、事务及并发 |
+| [模型图集](docs/uml/README.md)、[数据库设计（AsciiDoc）](docs/database/database-design.adoc) | 业务概念、模块、序列、状态、活动及数据库约束 |
+| [后端详细设计（AsciiDoc）](docs/design/detailed-design.adoc) | 认证、范围、保护规则、事务及并发 |
 | [API 约定](docs/standards/api-contract.md)、[OpenAPI](api/openapi.yaml) | 方法、字段、错误码与权限映射 |
 | [数据字典](docs/database/data-dictionary.md)、[导入规则](docs/database/import-rules.md) | 数据结构、清洗与质量核对 |
 | [小组分工](docs/planning/team.md) | 六位成员的责任及产物 |
