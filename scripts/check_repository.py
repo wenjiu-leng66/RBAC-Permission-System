@@ -23,7 +23,7 @@ REQUIRED = [
     'deploy/README.md', 'deploy/.env.example',
 ]
 FORBIDDEN_SUFFIXES = {'.xlsx', '.xls', '.xlsm', '.pem', '.key', '.p12', '.pfx', '.jks', '.dump', '.bak'}
-TEXT_SUFFIXES = {'.md', '.yml', '.yaml', '.json', '.py', '.csv', '.mmd', '.java', '.xml', '.properties', '.html', '.css', '.js', '.cjs', '.mjs'}
+TEXT_SUFFIXES = {'.md', '.yml', '.yaml', '.json', '.py', '.csv', '.mmd', '.java', '.xml', '.properties', '.html', '.css', '.js', '.cjs', '.mjs', '.ps1'}
 
 def tracked_candidates():
     result = subprocess.run(['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard'], cwd=ROOT, capture_output=True, check=True)

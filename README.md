@@ -40,11 +40,12 @@ sh scripts/deploy-stage1.sh
 | --- | --- |
 | [需求规格](docs/requirements/req-spec.md) | 功能范围、业务规则及非功能要求 |
 | [结构化设计](docs/design/structured-design.md) | 需求到模块、数据流、调用层次及测试的映射 |
+| [模型图集](docs/uml/README.md)、[数据库设计](docs/database/database-design.md) | 业务概念、模块、序列、状态、活动及数据库约束 |
 | [后端详细设计](docs/design/detailed-design.md) | 认证、范围、保护规则、事务及并发 |
 | [API 约定](docs/standards/api-contract.md)、[OpenAPI](api/openapi.yaml) | 方法、字段、错误码与权限映射 |
 | [数据字典](docs/database/data-dictionary.md)、[导入规则](docs/database/import-rules.md) | 数据结构、清洗与质量核对 |
 | [小组分工](docs/planning/team.md) | 六位成员的责任及产物 |
-| [本次测试报告](docs/testing/test-report-2026-10-27.md) | 82 项后端、58 项前端、41 项导入测试与覆盖率 |
+| [本次测试报告](docs/testing/test-report-2026-10-27.md) | 90 项后端、60 项前端、41 项导入测试与覆盖率 |
 | [第一阶段验收](docs/stage1/README.md) | 助教准入、教师检查、41 条需求追溯、测试与证据 |
 
 ## 交付边界
@@ -52,3 +53,5 @@ sh scripts/deploy-stage1.sh
 第一阶段允许界面原型与真实后端分别检查。角色继承、约束、角色激活切换、审计、面向对象后端及函数式模块属于后续阶段；当前对应页面为静态原型。
 
 全量数据基准为 111 个组织、18 个系统、115 个模块、359 个功能点、2154 个目录权限、10000 名员工加 `admin`；原清单五角色授权 3549 条，平台部门管理员另 6 条。合成数据测试不替代原始资料全量验收。原始 Excel、真实人员资料、密码、哈希、令牌、环境文件及数据库备份不提交。
+
+成员贡献经评审后修订整合，来源、采纳与未原样发布的内容见[整合记录](docs/stage1/contribution-review-2026-10-27.md)；历史部署及全量记录见验收材料。本轮仓库更新不等于服务器应用已更新。

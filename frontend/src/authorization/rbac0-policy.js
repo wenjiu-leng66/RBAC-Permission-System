@@ -6,10 +6,11 @@
 (function (root, createPolicy) {
   'use strict';
   var policy = createPolicy();
+  // policy-adapter 从全局读取策略；Vite 为 CommonJS 文件提供 module 时也必须设置全局，不能放在 else。
+  // 两种导出指向同一对象，既保留 Node require 兼容性，也避免生产构建报“权限策略未加载”。
+  root.Rbac0 = policy;
   if (typeof module === 'object' && module.exports) {
     module.exports = policy;
-  } else {
-    root.Rbac0 = policy;
   }
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';

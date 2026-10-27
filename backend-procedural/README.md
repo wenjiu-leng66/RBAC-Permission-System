@@ -93,3 +93,7 @@ python ../scripts/smoke_http.py --base-url http://localhost:8080
 ```
 
 `Stage1ApiTest` 的 API 集成检查覆盖登录失败同提示、手机号登录和会话轮换、首次改密、停用 / 重置旧会话、本人 / 部门 / 下级数据范围、后台越权、用户唯一性及删除负责人清空、账号保护、部门管理员授出限制、同码最大范围、即时撤权、角色 CRUD 与停用、授权合法性、全目录数量、PBKDF2 导入口令、事务写后故障回滚，以及双线程版本 CAS 恰有一个成功、并发角色分配与未确认删除串行、128 字符及 Unicode 口令完整性。JaCoCo 报告输出 `target/site/jacoco/index.html`，不沿用旧版覆盖率数字。MySQL、原始资料导入和服务器重启的验收请按项目级自测说明继续完成。
+
+## 本轮回归
+
+当前后端90项（61隔离单元+29整合）通过，新增8项来源边界测试，详见[测试报告](../docs/testing/test-report-2026-10-27.md)。Compose传递`RBAC_ALLOWED_ORIGINS`；示例空值只允许同源，跨域须配置精确可信Origin，不使用通配来源。同源Swagger不需额外条目。
