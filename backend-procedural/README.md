@@ -1,6 +1,6 @@
 # 第一阶段：面向功能 / 过程后端
 
-Java 21、Spring Boot 3.3.5、Spring JDBC、MySQL 8.4。沿用成员 4、5 的 Controller → Service → Mapper → PO 分层，在成员 1 的统一十表上完成 RBAC0。对外契约见 [OpenAPI](../api/openapi.yaml)，检查流程见 [第一阶段自测说明](../docs/stage1/self-test.md)。
+Java 21、Spring Boot 3.3.5、Spring JDBC、MySQL 8.4。采用 Controller → Service → Mapper → PO 分层，在统一十表上实现 RBAC0。对外契约见 [OpenAPI](../api/openapi.yaml)，检查流程见 [第一阶段自测说明](../docs/stage1/self-test.md)。
 
 ## 本阶段实现
 
@@ -25,7 +25,7 @@ mvn package -DskipTests
 java -jar target/rbac-procedural-backend-0.1.0-SNAPSHOT.jar
 ```
 
-`mvn test` 使用独立的内存 H2 和合成口令，不读取本地业务库；29 项集成测试已通过，覆盖范围见下文。应用默认使用 `h2` 配置，数据保存在当前目录的 `work/rbac-local.mv.db`，重启保留数据。演示初始化仅在空库执行，重复启动不会覆盖用户或密码。修改 `RBAC_INITIAL_PASSWORD` 不会重设已有用户密码。
+`mvn test` 使用独立的内存 H2 和合成口令，不读取本地业务库；分层单元和 API 集成测试的本次结果及覆盖率见[验收记录](../docs/stage1/verification-record.md)。应用默认使用 `h2` 配置，数据保存在当前目录的 `work/rbac-local.mv.db`，重启保留数据。演示初始化仅在空库执行，重复启动不会覆盖用户或密码。修改 `RBAC_INITIAL_PASSWORD` 不会重设已有用户密码。
 
 打开 `http://localhost:8080/swagger-ui/index.html`，登录接口为 `POST /api/v1/auth/login`。所有演示账号初始密码均为启动时注入的值：
 
@@ -92,4 +92,4 @@ mvn test
 python ../scripts/smoke_http.py --base-url http://localhost:8080
 ```
 
-`Stage1ApiTest` 共 29 项集成测试，覆盖登录失败同提示、手机号登录和会话轮换、首次改密、停用 / 重置旧会话、本人 / 部门 / 下级数据范围、后台越权、用户唯一性及删除负责人清空、账号保护、部门管理员授出限制、同码最大范围、即时撤权、角色 CRUD 与停用、授权合法性、全目录数量、PBKDF2 导入口令、事务写后故障回滚，以及双线程版本 CAS 恰有一个成功、并发角色分配与未确认删除串行、128 字符及 Unicode 口令完整性。JaCoCo 报告输出 `target/site/jacoco/index.html`，不沿用旧版覆盖率数字。MySQL、原始资料导入和服务器重启的验收请按项目级自测说明继续完成。
+`Stage1ApiTest` 的 API 集成检查覆盖登录失败同提示、手机号登录和会话轮换、首次改密、停用 / 重置旧会话、本人 / 部门 / 下级数据范围、后台越权、用户唯一性及删除负责人清空、账号保护、部门管理员授出限制、同码最大范围、即时撤权、角色 CRUD 与停用、授权合法性、全目录数量、PBKDF2 导入口令、事务写后故障回滚，以及双线程版本 CAS 恰有一个成功、并发角色分配与未确认删除串行、128 字符及 Unicode 口令完整性。JaCoCo 报告输出 `target/site/jacoco/index.html`，不沿用旧版覆盖率数字。MySQL、原始资料导入和服务器重启的验收请按项目级自测说明继续完成。

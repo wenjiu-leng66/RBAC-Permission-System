@@ -1,129 +1,87 @@
-# 检查前自测步骤
+# 第一阶段验收执行规程
 
-命令均在仓库根目录执行。先在独立的合成验收环境排练，避免重置真实员工数据。通过标准是实际结果等于本页预期，并在 [验证记录](verification-record.md) 留下版本、环境与证据；不能仅凭测试脚本存在认定通过。
+命令在仓库根目录执行；记录源码 SHA、日期、环境、数据来源、实际结果和证据。写入性验收使用独立合成环境，先核对目标实例与数据库。需求编号见[覆盖表](requirement-coverage.md)。
 
-按用户最新要求，本轮不连接或操作用户服务器。本文服务器部署、外网检查和备份命令供用户以后自行执行；本次只在本机验证仓库代码。
+## 1. 固定版本和环境
 
-## 1. 固定检查版本
-
-```powershell
+```bash
 git status --short
 git rev-parse HEAD
-python --version
 java -version
+mvn -version
 node --version
+python --version
 docker compose version
 ```
 
-记录源码 SHA 和未提交修改。要求 Python 3.11+、JDK 21、Maven、满足 Vite 版本要求的 Node；服务器运行使用 Docker Compose 2.20+。Docker 方案会在镜像内构建 Java/前端，本机只需 Docker、Git 和执行冒烟脚本的 Python。
+开发检查要求 JDK 21、Maven、Node 22.12+、Python 3.11+；容器部署要求 Compose 2.20+。后端 H2 测试、MySQL 验收和云服务器分别记录。
 
-Windows有多个Python时，先确认上述`python --version`满足要求；可用`py -3.12`替换下文`python`。本次本机实测用Bundled Python3.12.14，系统默认旧Python3.8不适合直接运行这些检查。Linux通常使用`python3`。
+## 2. 分层测试、集成测试与覆盖率
 
-## 2. 先跑自动化检查
-
-```powershell
-python scripts/check_repository.py
+```bash
+mvn -f backend-procedural/pom.xml clean verify
+python -m unittest discover -s tests/unit -p 'test_*.py'
+node --test tests/frontend/*.test.cjs
 python -m pip install -r scripts/requirements-validation.txt
 python scripts/check_openapi.py
-python -m unittest discover -s tests/unit -p "test_*.py"
-node --test tests/frontend/*.test.cjs
-mvn -f backend-procedural/pom.xml clean verify
+python scripts/check_repository.py
 npm --prefix frontend ci
 npm --prefix frontend run build
 git diff --check
 ```
 
-这些命令分别检查仓库/链接、导入清洗、原型与权限策略、真实 Java 后端、前端生产构建。后端测试的数据库与真实服务器 MySQL 应分开记；H2 测试通过不能替代 MySQL 与持久化检查。Maven 的 Surefire 与 JaCoCo 报告位于 `backend-procedural/target/`，运行日志留在本地，不上传员工资料或凭证。
+现场说明 Controller、Service、Mapper 等层的测试隔离对象，指出正常、参数错误、未登录、越权、越界、版本冲突、保护与回滚断言。`Stage1ApiTest` 使用 H2 合成数据库验证跨层 API，不替代真实 MySQL。
 
-## 3. 启动服务器同款环境
+核对 `backend-procedural/target/surefire-reports/` 的用例数、失败与跳过情况。打开 `backend-procedural/target/site/jacoco/index.html`，记录行、分支覆盖率及重要未覆盖代码；覆盖率须对应刚执行的版本，不能引用旧报告或以百分比代替业务断言。
 
-Linux 服务器按 [部署说明](../../deploy/README.md) 安装 Docker，在项目根目录执行：
+## 3. 运行实例与指定 API
+
+部署按[部署说明](../../deploy/README.md)执行。[指定 Swagger UI](http://124.70.42.35:8080/swagger-ui/index.html?url=/api-design/openapi.yaml)应加载 `/api-design/openapi.yaml`；健康检查为 `/api/v1/health`。
+
+使用部署负责人提供的合成账号在同一 Cookie 会话中现场调用：
+
+| 顺序 | 操作 | 必须核对 |
+| --- | --- | --- |
+| 1 | 未登录请求 `/api/v1/me`；错误密码登录 | 401；失败信息不暴露账号是否存在 |
+| 2 | 登录，查询本人及有效权限 | 成功建立 JSESSIONID；字段不含密码或哈希 |
+| 3 | 首次登录账号访问业务，再改密 | 改密前 403；改密后可用；旧密码失效 |
+| 4 | 普通员工查询台账并篡改目标 ID | SELF 仅本人；范围外写入 403，数据不变且不泄露字段 |
+| 5 | 部门管理员查看用户/部门子树 | DEPT 含全部下级，筛选或直接 ID 不能突破范围 |
+| 6 | 禁用用户、撤角色、停用角色或改授权 | 下一次请求生效；旧会话/权限不缓存放行 |
+| 7 | 两管理员用同一旧 version 替换授权 | 恰一成功，另一 409；无部分写入或版本误增 |
+| 8 | 未知/重复权限、缺 read、SELF 管理范围 | 参数或授权拒绝，集合和版本不变 |
+| 9 | 停用/删除自己或admin、修改自己/admin角色；删除内置角色、停用ADMIN或改其授权 | 仅这些保护操作拒绝；普通资料编辑按自身权限和范围判断 |
+| 10 | 退出后复用旧 Cookie | 401 |
+
+Swagger 可打开不等于上述请求已执行。`check_openapi.py --base-url URL`仅比较方法/路径；字段、状态、权限与范围须结合请求和测试核对。
+
+## 4. 真实 HTTP 与持久化
+
+独立合成环境执行：
 
 ```bash
-cp deploy/.env.example deploy/.env
-# 用编辑器填写 MYSQL_PASSWORD、MYSQL_ROOT_PASSWORD、RBAC_INITIAL_PASSWORD
-# 合成验收环境使用 RBAC_DEMO_ENABLED=true
-sh scripts/deploy-stage1.sh
-docker compose --env-file deploy/.env -f deploy/compose.yaml ps
-```
-
-Windows 本地 Docker Desktop 可先复制并编辑配置，再执行 Compose：
-
-```powershell
-Copy-Item deploy/.env.example deploy/.env
-# 编辑 deploy/.env；不要把密码粘到日志或提交 Git
-docker compose --env-file deploy/.env -f deploy/compose.yaml up -d --build --wait
-```
-
-浏览器访问 `http://localhost/`，应打开界面原型；`/stage1/` 是真实后端检查入口；`/api-design/openapi.yaml` 是统一接口契约；`/swagger-ui/index.html?url=/api-design/openapi.yaml` 可查看接口。`/api/v1/health` 应返回 `{"status":"UP"}`，同时代表数据库连接正常。服务器访问时将 `localhost` 换成服务器域名或 IP。
-
-`frontend/` 的模拟演示密码仅属于界面原型；真实后端密码取 `RBAC_INITIAL_PASSWORD`。服务器检查用真实后端入口或 HTTP 脚本，不把原型右上角切换身份当作真实登录。
-
-## 4. 真实 HTTP 自动自测
-
-```powershell
 python scripts/smoke_http.py --base-url http://127.0.0.1 --env-file deploy/.env --check-web
-python scripts/check_openapi.py --base-url http://127.0.0.1
-```
-
-脚本使用真实 Cookie，会创建并清理临时合成账号。运行前确认 `RBAC_DEMO_ENABLED=true`，且该实例未装载真实课程员工数据。它从本地环境文件读取初始密码，不在命令行显示密码。检查失败应退出非零，不能把部分 PASS 当作整体通过。
-
-预期覆盖：健康与公开入口；未登录 401；错误凭证统一 401；Cookie 登录与退出；普通员工调用管理接口 403；本人台账范围；部门管理员越范围/管理角色拒绝；首次改密拦截；角色整组替换和旧版本 409；账号/超级管理员保护；停用后旧会话 401。具体实际覆盖以脚本输出和测试源码为准，41 项覆盖表中未被自动覆盖的仍须手工演示。
-
-在服务器执行同一命令后，换另一台电脑从外网执行一次：
-
-```powershell
-python scripts/smoke_http.py --base-url https://你的域名 --env-file deploy/.env --check-web
-```
-
-未配置域名和 HTTPS 时使用实际 `http://服务器IP`，并在部署记录注明访问方式；不要把上面的占位地址作为真实入口。服务端自测不能代替外网访问验证。
-
-## 5. 手工排练关键验收场景
-
-先开两个浏览器会话或使用无痕窗口，避免混用 Cookie。合成演示账号包括 `admin`、`SG000001`、`SG000011`、`SG000013`、`SG000281`、`DEMO000100`；原型与后端的数据规模和密码来源独立。
-
-| 步骤 | 操作 | 应看到的结果 |
-| --- | --- | --- |
-| 1 | 不登录直接 `GET /api/v1/users`；普通员工登录后再请求 | 先 401，后 403，数据库不变 |
-| 2 | 用不存在账号、错误密码、停用账号登录 | 都是 401 `INVALID_CREDENTIALS`，同一“用户名或密码错误”提示 |
-| 3 | 管理员新建临时用户，再用初始密码登录 | `mustChangePassword=true`；仅本人信息、改密、退出可访问；其他接口 403 |
-| 4 | 错旧密码改密，再用正确旧密码改密；退出并用新旧密码分别登录 | 错旧密码拒绝；改密后旧密码失败、新密码成功 |
-| 5 | 员工 `SG000013` 查看菜单、考勤、我的权限及台账 | 无系统管理后台；考勤查看/编辑为 SELF；台账只见自己；无权按钮置灰 |
-| 6 | 部门经理 `SG000011` 看台账，再修改本部门/其他部门电话或邮箱 | 查看 ALL；本部门可改，其他部门 403 且响应无目标字段 |
-| 7 | 修改请求 URL 的 ID、请求体用户 ID 或提交姓名字段 | 篡改不能扩大范围；台账非电话/邮箱字段为 400 `FIELD_NOT_EDITABLE` |
-| 8 | 公司领导 `SG000001` 打开用户管理并直接调用新增/删除 | 页面只读；接口仍返回 403 |
-| 9 | 部门管理员 `DEMO000100` 查询本部门及下级、筛范围外部门、给范围外用户分配角色 | 只见本部门子树；范围外筛选为空；越权修改 403 |
-| 10 | 部门管理员尝试分配 ADMIN/DEPT_ADMIN 或修改角色授权 | 403，原有关系不变 |
-| 11 | 两个管理员先 GET 同一临时用户角色版本；第一个保存，再用旧版本保存 | 第一请求成功并 +1；第二请求 409 VERSION_CONFLICT，保存结果不被覆盖 |
-| 12 | 给自建角色授权，漏 read、传未知权限、旧版本；再保存合法带范围集合 | 非法请求拒绝且原集合不变；合法请求整体保存并 +1 |
-| 13 | 员工保持登录，管理员撤销其角色、停用角色、再恢复 | 下一次请求立即按新授权执行，无需重新登录 |
-| 14 | 停用仍保持登录的临时用户 | 该用户下一次请求 401；重新登录统一凭证错误 |
-| 15 | 尝试停用/删除自己、改自己角色；停用 ADMIN、删除内置角色、改 ADMIN 授权 | 409 PROTECTED_ACCOUNT / PROTECTED_ROLE |
-| 16 | 删除仍有用户的自建角色，先不确认，再带 confirm=true | 先 409 ROLE_HAS_USERS；确认后清除关系并更新版本 |
-| 17 | 删除作为部门负责人的临时用户（仅合成库） | 用户角色关系清除，部门负责人置空，无孤立记录 |
-
-授权写入中途失败后的事务回滚应由后端集成测试验证，不能仅用原型“模拟失败”按钮作证据。完成排练后清理临时账号/角色并恢复为验收初始状态。
-
-## 6. 数据重启后仍在
-
-```powershell
 python scripts/smoke_http.py --base-url http://127.0.0.1 --env-file deploy/.env --mode persistence-create
 docker compose --env-file deploy/.env -f deploy/compose.yaml down
-docker compose --env-file deploy/.env -f deploy/compose.yaml up -d --wait
+docker compose --env-file deploy/.env -f deploy/compose.yaml up -d --wait --wait-timeout 300
 python scripts/smoke_http.py --base-url http://127.0.0.1 --env-file deploy/.env --mode persistence-verify
 python scripts/smoke_http.py --base-url http://127.0.0.1 --env-file deploy/.env --mode persistence-cleanup
 ```
 
-不要加 `down -v`，它会删除数据库卷。重启后旧会话失效是正常现象，重新登录后临时验证数据仍存在才算持久化通过。再次初始化/导入前先按部署说明备份。
+`down`保留命名卷，不加 `--volumes`。保留 create 生成的同一标记文件；重启后重新登录，核对同一合成账号仍存在，再精确清理。冒烟创建临时账号/角色并尝试清理，故障中断后检查残留。
 
-## 7. 全量课程数据和性能
+另核对仅重建 backend 后 Nginx 仍能代理、容器健康、实际部署 SHA、数据库迁移版本、公开端口及备份恢复记录。当前后端内存会话重启失效是预期，数据库业务数据应保留。
 
-三份原始 Excel 通过受控方式放入 `data/raw/`，不提交 Git。按 [数据库说明](../../database/README.md) 离线导入，并执行 `database/seeds/verify_import.sql`。导入脚本的重复执行会重建数据，应在专用空库操作；它不能当作无损增量更新。
+## 5. 数据与性能
 
-核对 111 / 18 / 115 / 359 / 2154、10000 名员工加 admin、原清单授权 3549，平台部门管理员另外六条；抽查部门负责人、公司领导十人、副职为普通员工、部门经理台账范围、普通员工本人范围。相同输入运行两次比较指纹，密码哈希允许因随机盐不同。检查报告中的每项清洗是否能定位原表行列。
+正式输入目标为 111 组织、18 系统、115 模块、359 功能点、2154 权限、10000 员工加 admin；清单五角色授权 3549，平台另 6 条。检查工号/非空手机号唯一、组织单根无环、负责人 ID、权限稳定码、经理 read=ALL/edit=DEPT 与员工 SELF。
 
-在全量 MySQL 上保存鉴权查询 `EXPLAIN ANALYZE`（目标 ≤10 ms），测用户/台账列表及授权保存响应（目标 ≤1 s），记录机器配置、数据量、SQL/参数、冷热状态和结果。没有原始 Excel 或没有执行测量时，保留“待执行”，不能用合成目录和小样例声称已达全量指标。
+`import_excel.py`只生成离线 SQL。员工失败行可跳过，生成成功不代表全量成功；逐项审查失败、未关联负责人及警告。生成 SQL 使用 `TRUNCATE` 全量重建，MySQL DDL 不能事务回滚；先备份并确认目标库。`--update-codes`可能在后续失败前已写编号表，需审查差异。
 
-## 8. 检查当天
+同输入重复导入比较业务字段与关系，排除随机盐哈希和时间；核对 SQL 指纹仅作快速回归，关键差异按主键逐字段核验。全量 MySQL 记录 `EXPLAIN ANALYZE` 鉴权查询目标 ≤10 ms、常用列表/保存目标 ≤1 s，包含机器、数据量、参数、冷热状态与统计。未执行原始全量或测量时记“待执行”。
 
-检查服务器容器均 healthy、外网入口可访问；保存源码 SHA、迁移版本、自动测试/HTTP自测/重启验证/全量导入报告。按“原型页面 → API设计 → 后端允许与拒绝 → 授权立即生效/409 → 重启持久化”的顺序演示。完成 [验证记录](verification-record.md) 的实际结果和限制，供老师对照。
+## 6. 签收记录
+
+助教准入需原型运行、服务器后端、指定 API 现场调用、分层测试现场执行及覆盖率报告齐备。教师检查再按[结构化设计](../design/structured-design.md)逐项关联需求、数据流、模块、代码、API 和测试，不重复原型展示。
+
+将实际结果写入[验收记录](verification-record.md)，以“通过 / 失败 / 待执行 / 不在一期”表示；证据不记录密码、Cookie、哈希或真实人员信息。

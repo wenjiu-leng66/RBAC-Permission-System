@@ -1,13 +1,20 @@
-# 测试目录
+# 测试
 
-当前没有可连接真实后端的业务自动化测试。成员 6 已完成 [RBAC0 API 与权限拦截测试用例第一版草案](../docs/testing/member6-rbac0-api-test-cases.md)，等待成员 4 提供后端和合成测试数据后实现并执行。
+| 层次 | 位置 | 验证内容 |
+| --- | --- | --- |
+| 后端单元与分层测试 | `backend-procedural/src/test/java/` | 控制器、服务、持久层职责及关键拒绝路径，按测试类报告核对 |
+| 后端 API 集成 | `Stage1ApiTest` | H2 合成库中的认证、权限、数据范围、保护、事务及并发 |
+| 前端策略与模拟 API | `tests/frontend/` | 权限并集、范围、路由、原型模拟交互及版本冲突 |
+| 离线导入 | `tests/unit/test_import_excel.py` | 合成 XLSX/CSV 清洗、稳定编号、负责人及哈希协议 |
+| 契约 | `scripts/check_openapi.py` | 静态 OpenAPI 与运行端方法/路径覆盖 |
+| 部署验收 | `scripts/smoke_http.py` | 真实 Cookie/HTTP、拒绝场景、发布入口及分步持久化 |
 
-- unit：核心授权与纯计算等单元测试。成员 1 的 Excel 导入脚本测试：`python tests/unit/test_import_excel.py`，只需 Python 3 标准库和合成数据，不需要原始 Excel 或数据库。
-- contract：同一外部契约对两种后端的检查。
-- integration：数据库、事务、真实身份与 API 链路。
-- e2e：浏览器中的完整用户操作。
-- fixtures：合成测试数据与初始化说明。
+```bash
+mvn -f backend-procedural/pom.xml clean verify
+python -m unittest discover -s tests/unit -p 'test_*.py'
+node --test tests/frontend/*.test.cjs
+```
 
-后端语言内的单元测试也可放各自 `src/test`；此处保留跨实现与跨组件资料。新增测试时写清运行方式和对环境的依赖。
+后端测试与覆盖率报告分别位于 `backend-procedural/target/surefire-reports/`、`backend-procedural/target/site/jacoco/index.html`；报告由对应版本现场生成，不提交构建产物。2026-10-27 后端 82 项、导入 41 项、前端 58 项通过；后端行覆盖率 89.98%、分支覆盖率 74.06%，详见[测试报告](../docs/testing/test-report-2026-10-27.md)。测试数及覆盖率以[验收记录](../docs/stage1/verification-record.md)的本次实测为准。
 
-验证目标见 [验收矩阵](../docs/testing/acceptance-matrix.md)。
+H2、原型内存测试不能证明 MySQL 全量导入、服务器授权或性能达标。完整步骤见[第一阶段验收](../docs/stage1/README.md)，场景预期见[验收矩阵](../docs/testing/acceptance-matrix.md)。

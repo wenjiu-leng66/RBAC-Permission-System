@@ -2,11 +2,11 @@
 
 部署包提供 MySQL 8.4、JDK 21 Spring Boot 后端，以及 Nginx 托管的完整 Vue 界面原型和 API 设计。只把 Nginx 的 HTTP 端口发布到服务器；数据库和后端端口留在 Compose 网络中。当前界面原型使用模拟接口，真实后端通过 Swagger 和 HTTP 脚本验收。
 
-本目录是可执行的部署配置，**不表示已上传或已在某台服务器运行**。部署完成还需保存服务器入口、源码提交号和 HTTP 验收输出。
+当前 API 入口为 [服务器 Swagger UI](http://124.70.42.35:8080/swagger-ui/index.html?url=/api-design/openapi.yaml)。已核对的只读入口和待验证业务、部署版本及持久化状态见[验收记录](../docs/stage1/verification-record.md)。
 
 ## Linux 服务器一键启动
 
-前提：已有可使用的 Linux 服务器，Docker Engine、Compose 插件 2.20 或更新版本、Git，能够拉取 Maven/npm 依赖及官方容器镜像。建议至少 2 核、4 GB 内存、10 GB 可用磁盘用于构建。HTTP 默认占用 80 端口，已有站点时在 `.env` 选择空闲端口。
+前提：已有可使用的 Linux 服务器，Docker Engine、Compose 插件 2.20 或更新版本、Git，能够拉取 Maven/npm 依赖及官方容器镜像。构建资源需求以实际运行负载和依赖下载情况评估。HTTP 默认占用 80 端口，已有站点时在 `.env` 选择空闲端口。
 
 在服务器的项目目录执行：
 
@@ -89,10 +89,8 @@ chmod 600 /srv/rbac-backups/rbac-before-check.sql.gz
 gzip -t /srv/rbac-backups/rbac-before-check.sql.gz
 ```
 
-恢复应先在独立的空测试数据库验证备份，再在受控维护窗口恢复目标库。不得把含员工信息和密码哈希的备份上传公开 GitHub。验收记录至少保存提交号、访问入口、Compose 容器状态、自测输出、持久化验证结果和备份时间。
+恢复应先在独立的空测试数据库验证备份，再在受控维护窗口恢复目标库。含员工信息和密码哈希的备份不得进入公开仓库。验收记录至少保存提交号、访问入口、Compose 容器状态、自测输出、持久化验证结果和备份时间。
 
-## CI 范围和本机限制
+## 运行记录
 
-GitHub Actions 分别执行仓库检查、Python 导入测试、全部前端测试及构建、JDK 21 后端测试；另在 GitHub 的 Linux runner 上构建 Compose 栈，执行 MySQL 真实 HTTP 和重建后持久化检查。CI 的临时数据卷可在该任务结束后删除，服务器数据卷不得照搬删除命令。
-
-当前 Windows 工作机没有 Docker，不能以本机源码或配置检查代替容器运行结果。最终以服务器及 CI 实际执行成功记录为准；失败时保留日志定位，不把“配置已写好”写成“部署已完成”。
+签收记录包含源码 SHA、镜像、数据库迁移版本、容器健康、入口、真实 Cookie/HTTP、重启持久化及备份恢复结果。只读入口可达与本地测试分别记录，不能推定服务器已部署当前提交或全部业务通过。

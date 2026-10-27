@@ -1,4 +1,4 @@
-"""Check the preparation repository; this is not an application test suite."""
+"""Validate repository files and documentation; application behavior has separate tests."""
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 import csv
@@ -9,17 +9,18 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = [
     'README.md', 'CONTRIBUTING.md', '.gitignore', '.gitattributes', '.editorconfig',
-    '.github/CODEOWNERS', '.github/pull_request_template.md',
-    '.github/ISSUE_TEMPLATE/task.yml', '.github/ISSUE_TEMPLATE/bug_report.yml',
-    '.github/ISSUE_TEMPLATE/design_question.yml', '.github/ISSUE_TEMPLATE/config.yml',
-    '.github/workflows/repository-checks.yml',
-    'frontend/README.md', 'backend-procedural/README.md', 'backend-oo/README.md',
-    'api/README.md', 'api/openapi.yaml', 'database/migrations/README.md',
-    'database/seeds/README.md', 'data/README.md', 'data/raw/.gitkeep',
-    'docs/guides/github-team-manual.md', 'docs/planning/team.md',
-    'docs/planning/milestones.md', 'docs/standards/api-contract.md',
-    'docs/requirements/questions.md', 'docs/testing/acceptance-matrix.md',
-    'tests/README.md', 'deploy/README.md', 'deploy/.env.example',
+    'frontend/README.md', 'backend-procedural/README.md',
+    'api/README.md', 'api/openapi.yaml', 'database/README.md',
+    'database/migrations/V001__create_core_tables.sql',
+    'database/seeds/import_excel.py', 'data/README.md', 'data/raw/.gitkeep',
+    'docs/README.md', 'docs/planning/team.md', 'docs/planning/milestones.md',
+    'docs/requirements/req-spec.md', 'docs/design/structured-design.md',
+    'docs/design/detailed-design.md', 'docs/database/data-dictionary.md',
+    'docs/database/import-rules.md', 'docs/standards/api-contract.md',
+    'docs/stage1/README.md', 'docs/stage1/self-test.md',
+    'docs/stage1/requirement-coverage.md', 'docs/stage1/verification-record.md',
+    'docs/testing/acceptance-matrix.md', 'tests/README.md',
+    'deploy/README.md', 'deploy/.env.example',
 ]
 FORBIDDEN_SUFFIXES = {'.xlsx', '.xls', '.xlsm', '.pem', '.key', '.p12', '.pfx', '.jks', '.dump', '.bak'}
 TEXT_SUFFIXES = {'.md', '.yml', '.yaml', '.json', '.py', '.csv', '.mmd', '.java', '.xml', '.properties', '.html', '.css', '.js', '.cjs', '.mjs'}

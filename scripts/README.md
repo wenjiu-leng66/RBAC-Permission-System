@@ -1,15 +1,16 @@
-# 仓库检查
+# 工程脚本
 
-在根目录执行 `python scripts/check_repository.py`。脚本仅用 Python 标准库及 Git。
+以下命令在仓库根目录执行。
 
-覆盖结构所需文件、UTF-8、本地 Markdown 文件链接、残留冲突标记、明确不应提交的文件和合成样例关联。未检查远程链接可访问性、Markdown 章节锚点、所有秘密形式或应用业务行为。
+| 脚本 | 职责 |
+| --- | --- |
+| `python scripts/check_repository.py` | 文件结构、UTF-8、Markdown 本地链接、冲突标记、禁入文件和合成样例引用 |
+| `python scripts/check_openapi.py` | OpenAPI 结构与引用；加 `--base-url` 比较运行端方法/路径集合 |
+| `sh scripts/deploy-stage1.sh` | 读取部署环境文件，构建并等待三个服务健康 |
+| `python scripts/smoke_http.py --base-url http://127.0.0.1 --env-file deploy/.env --check-web` | 真实 HTTP/Cookie 的一期代表场景及发布入口 |
 
-检查通过不取代人工检查暂存差异，不能证明不存在所有敏感信息。
+`check_openapi.py` 需要 `scripts/requirements-validation.txt` 中的依赖；其余 Python 脚本使用标准库。HTTP 冒烟要求独立合成验收环境，会创建和清理临时账号、角色。
 
-一期新增：
+持久化验证使用 `persistence-create`、实际重启、`persistence-verify`、`persistence-cleanup` 四步；标记文件保存在本地 `data/raw/`。参数见 `--help`，执行标准见[验收步骤](../docs/stage1/self-test.md)。
 
-- `sh scripts/deploy-stage1.sh`：读取服务器 `deploy/.env`，构建并等待 MySQL、后端、Nginx 三个服务就绪。
-- `python scripts/smoke_http.py --base-url http://127.0.0.1 --env-file deploy/.env --check-web`：通过真实 HTTP Cookie 验证授权、数据范围、改密、版本冲突、旧会话及页面入口，进程退出码非 0 表示失败。
-- `smoke_http.py --mode persistence-create|persistence-verify|persistence-cleanup`：创建合成账号标记，配合重建容器验证 MySQL 命名卷持久化。
-
-完整参数见 `python scripts/smoke_http.py --help`；执行顺序与预期结果见 [部署与自测](../deploy/README.md)。Python 脚本仅使用标准库，不需安装 requirements。
+仓库静态检查不代替应用测试，也不是全面的秘密或个人信息扫描。部署及数据操作须核对环境和目标库。
