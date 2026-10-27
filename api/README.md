@@ -3,6 +3,7 @@
 [openapi.yaml](openapi.yaml) 为权威接口文件，版本 `0.3.0`。覆盖认证、首次改密、当前权限、门户、员工台账、用户、部门、角色、目录、授权整组替换与健康检查。
 
 - 基础路径：`/api/v1`；会话：`JSESSIONID` Cookie。
+- 登录请求：`{account,password}`，`account`接受工号或手机号；用户资料的工号字段为`username`。
 - 业务成功响应直接返回对象；分页为 `items/page/pageSize/total`。
 - 错误响应：`{error:{code,message,requestId,details}}`。
 - 角色授权为 `grants:[{code,scope}]`；仅接受清单权限码，不直接授予派生 `rbac:*`。
