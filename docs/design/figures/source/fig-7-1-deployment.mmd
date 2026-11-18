@@ -1,0 +1,31 @@
+flowchart TB
+  subgraph NET["Internet"]
+    U["用户浏览器<br/>Chrome / Edge"]
+  end
+  subgraph DMZ["DMZ / 接入区"]
+    NG["Nginx<br/>TLS 1.2+ / 静态资源<br/>反向代理 / 限流"]
+  end
+  subgraph APPZ["应用区（内网）"]
+    A1["应用节点 1<br/>Spring Boot / JPA<br/>Spring Session"]
+    A2["应用节点 2（可选）<br/>Spring Boot / JPA"]
+  end
+  subgraph DATA["数据区（内网）"]
+    DB[("MySQL 主库 8.4<br/>业务 / 会话 / 日志")]
+    DB2[("MySQL 备库（可选）<br/>只读 / 故障切换")]
+  end
+  subgraph OPS["运维 / 备份区"]
+    BK[("备份存储<br/>全量 + binlog")]
+    MON["监控 / 日志（可选）"]
+    BAS["堡垒机 / VPN（可选）"]
+  end
+  U -->|"HTTPS 443"| NG
+  NG -->|"HTTP 8080"| A1
+  NG -.->|"HTTP 8080"| A2
+  A1 -->|"MySQL 3306"| DB
+  A2 -.->|"MySQL 3306"| DB
+  DB -.->|"异步复制"| DB2
+  A1 -.->|"加密备份"| BK
+  DB -.->|"全量 / binlog"| BK
+  MON -.->|"健康 / 指标"| A1
+  BAS -.->|"SSH / HTTPS"| A1
+  DB -.->|"3306 不对公网"| BAS

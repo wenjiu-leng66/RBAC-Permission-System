@@ -1,0 +1,30 @@
+sequenceDiagram
+  autonumber
+  actor D as 部门管理员
+  participant N as Nginx
+  participant G as GrantAppService
+  participant O as OrgScopeResolver
+  participant C as CatalogQuery
+  participant DB as MySQL
+  participant L as 审计
+  D->>N: PUT /users/{id}/roles（目标用户 + 角色集合）
+  N->>G: 转发请求
+  G->>G: 读取 admin_type=2、admin_dept_id
+  G->>O: 目标用户是否在管理子树内
+  O->>DB: 递归 CTE 查询部门子树
+  DB-->>O: 目标部门
+  alt 目标用户在子树外
+    O-->>G: false
+    G-->>N: 403 OUT_OF_SCOPE
+    N-->>D: 403（不返回目标字段）
+  else 目标用户在子树内
+    G->>C: 目标角色是否拥有 rbac:* 权限
+    C-->>G: 管理类角色
+    G-->>N: 403 FORBIDDEN
+    N-->>D: 403（不能分配管理类角色）
+  else 业务角色
+    G->>DB: 事务：替换用户角色、版本+1、authz_version+1
+    G->>L: 写授权变更日志
+    G-->>N: 200 新版本
+    N-->>D: 保存成功
+  end

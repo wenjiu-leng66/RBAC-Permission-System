@@ -39,13 +39,14 @@ public class UserMapper {
   }
 
   /**
-   * 工号或手机号登录共用参数化查询；唯一约束及导入规则负责保证账号标识的确定性。
+   * 工号或手机号登录共用参数化查询，返回全部候选而不是随机取第一个。
+   *
+   * <p>工号和手机号是两列独立的唯一键，跨列可能撞值；认证层必须看到候选数量后再决定，
+   * 不能在这里用 findFirst 隐式选择某个账号。
    */
-  public Optional<UserPO> findByAccount(String account) {
-    return jdbc
-        .query("SELECT * FROM sys_user WHERE username=? OR phone=?", ROW, account, account)
-        .stream()
-        .findFirst();
+  public List<UserPO> findByAccountCandidates(String account) {
+    return jdbc.query(
+        "SELECT * FROM sys_user WHERE username=? OR phone=? ORDER BY id", ROW, account, account);
   }
 
   public List<UserPO> findAll() {
@@ -106,9 +107,20 @@ public class UserMapper {
   }
 
   public boolean usernameExists(String value) {
-    return jdbc.queryForObject(
-            "SELECT COUNT(*) FROM sys_user WHERE username=?", Integer.class, value)
-        > 0;
+    return usernameExists(value, null);
+  }
+
+  /**
+   * 编辑时排除当前账号，供跨列登录标识检查使用；null 值不参与重复判断。
+   */
+  public boolean usernameExists(String value, String except) {
+    return value != null
+        && jdbc.queryForObject(
+                "SELECT COUNT(*) FROM sys_user WHERE username=? AND id<>?",
+                Integer.class,
+                value,
+                except == null ? "0" : except)
+            > 0;
   }
 
   /**

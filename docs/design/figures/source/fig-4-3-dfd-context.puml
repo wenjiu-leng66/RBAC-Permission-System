@@ -1,0 +1,64 @@
+@startuml
+!pragma layout smetana
+left to right direction
+skinparam dpi 170
+
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam nodesep 35
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam entity {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #94A3B8
+  FontColor #1F2937
+}
+skinparam component {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam rectangle {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam usecase {
+  BackgroundColor #FFF7E6
+  BorderColor #D6A84B
+  FontColor #1F2937
+}
+skinparam database {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam note {
+  BackgroundColor #FFF7E6
+  BorderColor #D6A84B
+}
+
+rectangle "E1 普通用户 / 业务人员" as E1
+rectangle "E2 管理员\n超级管理员 / 部门管理员" as E2
+rectangle "E3 课程原始 Excel" as E3
+usecase "P0 统一权限管理平台" as P0
+E1 --> P0 : F1 登录凭据 / 应用标识
+P0 --> E1 : F2 会话 / 应用权限树
+E1 --> P0 : F3 业务 / 菜单请求
+P0 --> E1 : F4 业务数据 / 拒绝结果
+E2 --> P0 : F5 管理请求
+P0 --> E2 : F6 管理结果 / 审计回执
+E3 --> P0 : F7 原始 Excel
+P0 --> E2 : F8 导入报告
+@enduml

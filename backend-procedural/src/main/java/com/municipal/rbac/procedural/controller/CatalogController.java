@@ -1,6 +1,7 @@
 package com.municipal.rbac.procedural.controller;
 
 import com.municipal.rbac.procedural.service.CatalogService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ public class CatalogController {
     this.catalog = catalog;
   }
 
+  @Operation(operationId = "get_catalog_functions")
   @GetMapping("/catalog/functions")
   public Map<String, Object> functions(
       @RequestParam(required = false) String systemCode,
@@ -28,6 +30,7 @@ public class CatalogController {
     return catalog.functions(session, systemCode, moduleId, keyword, page, pageSize);
   }
 
+  @Operation(operationId = "get_permissions")
   @GetMapping("/permissions")
   public Map<String, Object> permissions(
       @RequestParam(required = false) String systemCode,
@@ -39,6 +42,7 @@ public class CatalogController {
     return catalog.permissions(session, systemCode, moduleId, keyword, page, pageSize);
   }
 
+  @Operation(operationId = "get_resources")
   @GetMapping("/resources")
   public Map<String, Object> resources(
       @RequestParam(required = false) String parentId,

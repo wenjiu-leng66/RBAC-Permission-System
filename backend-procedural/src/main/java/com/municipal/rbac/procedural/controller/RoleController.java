@@ -2,6 +2,7 @@ package com.municipal.rbac.procedural.controller;
 
 import com.municipal.rbac.procedural.dto.Requests;
 import com.municipal.rbac.procedural.service.RoleService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.util.Map;
@@ -20,6 +21,7 @@ public class RoleController {
     this.roles = roles;
   }
 
+  @Operation(operationId = "get_roles")
   @GetMapping
   public Map<String, Object> list(
       @RequestParam(required = false) String keyword,
@@ -29,11 +31,13 @@ public class RoleController {
     return roles.list(session, keyword, page, pageSize);
   }
 
+  @Operation(operationId = "get_roles_id")
   @GetMapping("/{id}")
   public Map<String, Object> detail(@PathVariable String id, HttpSession session) {
     return roles.detail(session, id);
   }
 
+  @Operation(operationId = "post_roles")
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public Map<String, Object> create(
@@ -41,18 +45,21 @@ public class RoleController {
     return roles.create(session, body);
   }
 
+  @Operation(operationId = "patch_roles_id")
   @PatchMapping("/{id}")
   public Map<String, Object> update(
       @PathVariable String id, @Valid @RequestBody Requests.UpdateRole body, HttpSession session) {
     return roles.update(session, id, body);
   }
 
+  @Operation(operationId = "patch_roles_id_status")
   @PatchMapping("/{id}/status")
   public Map<String, Object> status(
       @PathVariable String id, @Valid @RequestBody Requests.Enabled body, HttpSession session) {
     return roles.status(session, id, body);
   }
 
+  @Operation(operationId = "delete_roles_id")
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(
@@ -62,6 +69,7 @@ public class RoleController {
     roles.delete(session, id, confirm);
   }
 
+  @Operation(operationId = "get_roles_id_users")
   @GetMapping("/{id}/users")
   public Map<String, Object> users(
       @PathVariable String id,
@@ -71,11 +79,13 @@ public class RoleController {
     return roles.roleUsers(session, id, page, pageSize);
   }
 
+  @Operation(operationId = "get_roles_id_permissions")
   @GetMapping("/{id}/permissions")
   public Map<String, Object> permissions(@PathVariable String id, HttpSession session) {
     return roles.rolePermissions(session, id);
   }
 
+  @Operation(operationId = "put_roles_id_permissions")
   @PutMapping("/{id}/permissions")
   public Map<String, Object> replace(
       @PathVariable String id, @Valid @RequestBody Requests.Grants body, HttpSession session) {

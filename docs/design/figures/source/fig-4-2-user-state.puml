@@ -1,0 +1,74 @@
+@startuml
+!pragma layout smetana
+skinparam dpi 170
+
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam nodesep 35
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam entity {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #94A3B8
+  FontColor #1F2937
+}
+skinparam component {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam rectangle {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam usecase {
+  BackgroundColor #FFF7E6
+  BorderColor #D6A84B
+  FontColor #1F2937
+}
+skinparam database {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam note {
+  BackgroundColor #FFF7E6
+  BorderColor #D6A84B
+}
+
+state "待改密\nPENDING_PASSWORD" as PENDING
+state "正常\nACTIVE" as ACTIVE
+state "锁定\nLOCKED" as LOCKED
+state "停用\nDISABLED" as DISABLED
+state "已删除\nDELETED" as DELETED
+[*] --> PENDING : 创建 / 导入 / 重置
+PENDING --> PENDING : 登录成功但未改密
+PENDING --> ACTIVE : 修改密码 [旧密码正确且新密码合法]
+ACTIVE --> ACTIVE : 登录成功 [密码正确且未锁定]
+ACTIVE --> LOCKED : 第 5 次登录失败
+ACTIVE --> PENDING : 管理员重置密码
+ACTIVE --> DISABLED : 管理员停用 [非自己且非唯一 admin]
+ACTIVE --> DELETED : 删除 [非自己且非唯一 admin]
+LOCKED --> ACTIVE : 锁定到期 [账号启用且须改密=0]
+LOCKED --> PENDING : 锁定到期 [账号启用且须改密=1]
+LOCKED --> DISABLED : 管理员停用
+DISABLED --> ACTIVE : 管理员启用 [须改密=0]
+DISABLED --> PENDING : 管理员启用 [须改密=1]
+DISABLED --> DELETED : 删除 [非自己且非唯一 admin]
+PENDING --> DISABLED : 管理员停用
+PENDING --> DELETED : 删除 [非自己且非唯一 admin]
+DELETED --> [*]
+
+@enduml

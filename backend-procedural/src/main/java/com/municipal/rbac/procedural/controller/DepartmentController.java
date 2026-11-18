@@ -1,6 +1,7 @@
 package com.municipal.rbac.procedural.controller;
 
 import com.municipal.rbac.procedural.service.DepartmentService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpSession;
 import java.util.*;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +18,13 @@ public class DepartmentController {
     this.departments = departments;
   }
 
+  @Operation(operationId = "get_departments")
   @GetMapping
   public List<Map<String, Object>> tree(HttpSession session) {
     return departments.tree(session);
   }
 
+  @Operation(operationId = "get_departments_id_members")
   @GetMapping("/{id}/members")
   public Map<String, Object> members(
       @PathVariable String id,

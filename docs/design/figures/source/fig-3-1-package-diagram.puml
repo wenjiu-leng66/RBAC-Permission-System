@@ -1,0 +1,77 @@
+@startuml
+!pragma layout smetana
+top to bottom direction
+skinparam dpi 170
+
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam nodesep 35
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam entity {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #94A3B8
+  FontColor #1F2937
+}
+skinparam component {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam rectangle {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam usecase {
+  BackgroundColor #FFF7E6
+  BorderColor #D6A84B
+  FontColor #1F2937
+}
+skinparam database {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam note {
+  BackgroundColor #FFF7E6
+  BorderColor #D6A84B
+}
+
+skinparam defaultFontSize 16
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+package "接入层 web" as WEB {
+  [Controller / DTO / Bean Validation\n鉴权拦截器 / 全局异常 / 会话] as W
+}
+package "应用层 application（按业务模块纵向切分）" as APP {
+  [11 个模块：identity / org / user / role / catalog / grant\nauthz / portal / ledger / audit / import] as M
+  [用例服务编排 + 事务边界 + DTO/VO 转换] as M2
+}
+package "领域层 domain" as DOM {
+  [实体 / 值对象\nUser、Dept、Role、Permission、AppResource、ApiEndpoint] as E
+  [领域服务\nEffectivePermissionCalculator、ApiPermissionResolver\nMenuTreeAssembler、ConstraintChecker、ScopeResolver] as S
+  [领域端口\nOrgScopeResolver、PermissionGrantRepository、AuditPort] as P
+}
+package "基础设施层 infrastructure" as INF {
+  [JPA Repository / MySQL 8.4 / Spring Session JDBC\nCaffeine / Flyway / 离线导入 CLI] as I
+}
+package "共享层 shared" as SH {
+  [错误码 / 分页 / ID / 时钟] as X
+}
+WEB --> APP
+APP --> DOM
+INF ..> DOM : 实现端口
+SH ..> APP : 被各层使用
+@enduml

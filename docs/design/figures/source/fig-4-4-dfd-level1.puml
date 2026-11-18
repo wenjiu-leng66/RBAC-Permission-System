@@ -1,0 +1,95 @@
+@startuml
+!pragma layout smetana
+skinparam dpi 170
+
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam nodesep 35
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam entity {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #94A3B8
+  FontColor #1F2937
+}
+skinparam component {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam rectangle {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam usecase {
+  BackgroundColor #FFF7E6
+  BorderColor #D6A84B
+  FontColor #1F2937
+}
+skinparam database {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam note {
+  BackgroundColor #FFF7E6
+  BorderColor #D6A84B
+}
+
+rectangle "E1 普通用户 / 业务人员" as E1
+rectangle "E2 管理员" as E2
+rectangle "E3 课程原始 Excel" as E3
+usecase "P1 登录与会话" as P1
+usecase "P2 菜单与鉴权" as P2
+usecase "P3 用户与组织管理" as P3
+usecase "P4 角色与授权管理" as P4
+usecase "P5 目录 / API 映射管理" as P5
+usecase "P6 审计" as P6
+usecase "P7 数据导入" as P7
+database "D1 用户与组织" as D1
+database "D2 角色与授权" as D2
+database "D3 目录与 API" as D3
+database "D4 审计日志" as D4
+E1 --> P1 : F1
+P1 --> E1 : F2
+E1 --> P2 : F3
+P2 --> E1 : F4
+E2 --> P3 : F5a
+P3 --> E2 : F6a
+E2 --> P4 : F5b
+P4 --> E2 : F6b
+E2 --> P5 : F5c
+P5 --> E2 : F6c
+E3 --> P7 : F7
+P7 --> E2 : F8
+P1 --> P2 : 会话 / 应用上下文
+P1 --> D1
+P1 --> D2
+P2 --> D2
+P2 --> D3
+P2 --> P6 : 审计事件
+P3 --> D1
+P3 --> P6 : 审计事件
+P4 --> D2
+P4 --> D3
+P4 --> P6 : 审计事件
+P5 --> D3
+P5 --> P6 : 审计事件
+P6 --> D4
+D4 --> E2 : F6 审计回执
+P7 --> D1
+P7 --> D2
+P7 --> D3
+@enduml

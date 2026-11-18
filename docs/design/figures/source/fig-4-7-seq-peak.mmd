@@ -1,0 +1,33 @@
+sequenceDiagram
+  autonumber
+  actor M as 200 名管理员
+  participant N as Nginx
+  participant I as AuthorizationInterceptor
+  participant A as AuthorizationService
+  participant C as PermissionCache
+  participant DB as MySQL
+  participant U as UserAppService
+  loop 并发列表 / 筛选 / 翻页
+    M->>N: GET /users?dept=...&page=...
+    N->>I: 转发请求
+    I->>A: 会话身份 + operationId
+    A->>DB: 读取当前 authz_version（主库）
+    DB-->>A: version
+    A->>C: get(userId + appCode + version)
+    alt 缓存命中
+      C-->>A: 有效权限 + 范围
+    else 缓存未命中
+      A->>DB: 加载用户角色、角色授权、继承闭包
+      DB-->>A: 授权数据
+      A->>A: EffectivePermissionCalculator
+      A->>C: put(key, 权限)
+    end
+    A->>A: ApiPermissionResolver → rbac:user:read
+    A-->>I: 允许
+    I->>U: 执行列表查询
+    U->>DB: 范围裁剪 + 索引 + 分页
+    DB-->>U: 分页结果
+    U-->>N: 200 items / total
+    N-->>M: 200
+  end
+  Note over A,C: 目标：P95 鉴权 ≤10ms；列表 ≤1s；错误率 <0.1%
