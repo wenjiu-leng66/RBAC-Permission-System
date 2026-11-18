@@ -1,0 +1,180 @@
+@startuml
+!pragma layout smetana
+left to right direction
+skinparam dpi 170
+
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam nodesep 35
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam entity {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #94A3B8
+  FontColor #1F2937
+}
+skinparam component {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam rectangle {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam usecase {
+  BackgroundColor #FFF7E6
+  BorderColor #D6A84B
+  FontColor #1F2937
+}
+skinparam database {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam note {
+  BackgroundColor #FFF7E6
+  BorderColor #D6A84B
+}
+
+package "用户与组织" {
+  entity "sys_user" as U {
+    * id : bigint <<PK>>
+    --
+    username : varchar <<UK>>
+    dept_id : bigint <<FK>>
+    admin_type : tinyint
+    admin_dept_id : bigint <<FK>>
+    role_version : int
+  }
+  entity "sys_dept" as DEPT {
+    * id : bigint <<PK>>
+    --
+    parent_id : bigint <<FK>>
+    name : varchar
+    dept_type : varchar
+    manager_user_id : bigint <<FK>>
+  }
+  entity "sys_user_role" as UR {
+    * user_id : bigint <<PK,FK>>
+    * role_id : bigint <<PK,FK>>
+  }
+}
+package "角色与约束" {
+  entity "sys_role" as R {
+    * id : bigint <<PK>>
+    --
+    code : varchar <<UK>>
+    builtin : tinyint
+    permission_version : int
+  }
+  entity "sys_role_permission" as RP {
+    * role_id : bigint <<PK,FK>>
+    * permission_id : bigint <<PK,FK>>
+    --
+    data_scope : varchar
+  }
+  entity "sys_role_inherit" as RI {
+    * senior_role_id : bigint <<PK,FK>>
+    * junior_role_id : bigint <<PK,FK>>
+  }
+  entity "sys_constraint" as CON {
+    * id : bigint <<PK>>
+    --
+    type : varchar
+    max_users : int
+    max_roles : int
+  }
+  entity "sys_constraint_role" as CR {
+    * constraint_id : bigint <<PK,FK>>
+    * role_id : bigint <<PK,FK>>
+  }
+}
+package "应用、目录与 API" {
+  entity "app_application" as APP {
+    * id : bigint <<PK>>
+    --
+    code : varchar <<UK>>
+    name : varchar
+  }
+  entity "app_resource" as RES {
+    * id : bigint <<PK>>
+    --
+    app_id : bigint <<FK>>
+    parent_id : bigint <<FK>>
+    resource_type : varchar
+    menu_level : tinyint
+    code : varchar <<UK>>
+    grantable : tinyint
+  }
+  entity "sys_permission" as PERM {
+    * id : bigint <<PK>>
+    --
+    resource_id : bigint <<FK>>
+    code : varchar <<UK>>
+    permission_type : varchar
+  }
+  entity "sys_api" as API {
+    * id : bigint <<PK>>
+    --
+    app_id : bigint <<FK>>
+    operation_id : varchar <<UK>>
+    http_method : varchar
+    path_pattern : varchar
+    permission_mode : varchar
+  }
+  entity "sys_permission_api" as PA {
+    * permission_id : bigint <<PK,FK>>
+    * api_id : bigint <<PK,FK>>
+    --
+    mapping_type : varchar
+  }
+}
+package "日志" {
+  entity "sys_login_log" as LL {
+    * id : bigint <<PK>>
+    --
+    user_id : bigint <<FK>>
+    result : varchar
+    created_at : datetime
+  }
+  entity "sys_grant_log" as GL {
+    * id : bigint <<PK>>
+    --
+    operator_id : bigint <<FK>>
+    action : varchar
+    created_at : datetime
+  }
+}
+APP ||--o{ RES
+RES ||--o{ RES : parent_id
+RES |o--|| PERM : resource_id
+PERM ||--o{ PA
+API ||--o{ PA
+R ||--o{ RP
+PERM ||--o{ RP
+U ||--o{ UR
+R ||--o{ UR
+DEPT ||--o{ DEPT : parent_id
+DEPT ||--o{ U : dept_id
+DEPT ||--o{ U : admin_dept_id
+U |o--o{ DEPT : manager_user_id
+R ||--o{ RI : senior_role_id
+R ||--o{ RI : junior_role_id
+CON ||--o{ CR
+R ||--o{ CR
+U ||--o{ LL : user_id
+U ||--o{ GL : operator_id
+@enduml

@@ -5,8 +5,9 @@ import static com.municipal.rbac.procedural.vo.Views.map;
 import com.municipal.rbac.procedural.dto.Requests;
 import com.municipal.rbac.procedural.error.ApiException;
 import com.municipal.rbac.procedural.mapper.UserMapper;
+import com.municipal.rbac.procedural.po.UserPO;
 import jakarta.servlet.http.HttpSession;
-import java.util.Map;
+import java.util.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +42,10 @@ public class AuthService {
   public Map<String, Object> login(Requests.Login request, HttpSession session) {
     session.removeAttribute(AuthorizationService.SESSION_USER);
     session.removeAttribute(AuthorizationService.SESSION_CREDENTIAL);
-    var user = users.findByAccount(request.account().trim()).orElse(null);
+    String account = request.account().trim();
+    List<UserPO> candidates = users.findByAccountCandidates(account);
+    // 工号和手机号跨列撞值时会有多个候选；不能随机选一个，否则同一登录串可能登进不同账号。
+    UserPO user = candidates.size() == 1 ? candidates.get(0) : null;
     boolean matches = false;
     try {
       matches =
@@ -49,7 +53,7 @@ public class AuthService {
     } catch (IllegalArgumentException ignored) {
       // 不支持或损坏的历史哈希按凭据错误处理，不能绕过认证，也不向响应暴露哈希格式。
     }
-    if (user == null || !user.enabled() || !matches)
+    if (candidates.size() != 1 || user == null || !user.enabled() || !matches)
       throw ApiException.unauthorized("INVALID_CREDENTIALS", "用户名或密码错误");
     session.setAttribute(AuthorizationService.SESSION_USER, user.id());
     session.setAttribute(AuthorizationService.SESSION_CREDENTIAL, user.passwordHash());

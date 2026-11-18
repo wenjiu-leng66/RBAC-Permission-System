@@ -81,6 +81,31 @@ class UserServiceTest {
   }
 
   @Test
+  void createRejectsUsernameThatIsAlreadyAnotherAccountsPhone() {
+    allowCreateDepartment();
+    when(users.phoneExists("NEW1", null)).thenReturn(true);
+
+    var error =
+        assertThrows(ApiException.class, () -> service.create(session, createRequest()));
+
+    assertEquals("VALIDATION", error.code());
+    verify(users, never()).insert(any(), any(), any(), any(), any(), any(), any());
+  }
+
+  @Test
+  void createRejectsPhoneThatIsAlreadyAnotherAccountsUsername() {
+    allowCreateDepartment();
+    when(users.usernameExists("13800000000", null)).thenReturn(true);
+    var request =
+        new Requests.CreateUser("NEW1", "Synthetic", "10", null, "13800000000", null);
+
+    var error = assertThrows(ApiException.class, () -> service.create(session, request));
+
+    assertEquals("VALIDATION", error.code());
+    verify(users, never()).insert(any(), any(), any(), any(), any(), any(), any());
+  }
+
+  @Test
   void missingInitialPasswordRejectsCreationWithoutDatabaseWrite() {
     allowCreateDepartment();
     var unconfigured = new UserService(users, roles, departments, authorization, me, passwords, "");

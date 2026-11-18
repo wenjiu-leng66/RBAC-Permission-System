@@ -1,0 +1,148 @@
+@startuml
+!pragma layout smetana
+left to right direction
+skinparam dpi 170
+
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam nodesep 35
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam entity {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #94A3B8
+  FontColor #1F2937
+}
+skinparam component {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam rectangle {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam usecase {
+  BackgroundColor #FFF7E6
+  BorderColor #D6A84B
+  FontColor #1F2937
+}
+skinparam database {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam note {
+  BackgroundColor #FFF7E6
+  BorderColor #D6A84B
+}
+
+package "用户与组织" {
+  class User <<entity>> {
+    +Long id
+    +String username
+    +AdminType adminType
+    +Long adminDeptId
+    +int roleVersion
+  }
+  class Dept <<entity>> {
+    +Long id
+    +String name
+    +String deptType
+  }
+  class UserRole <<entity>> {
+    +Long userId
+    +Long roleId
+  }
+}
+package "角色与约束" {
+  class Role <<entity>> {
+    +Long id
+    +String code
+    +boolean builtin
+    +int permissionVersion
+  }
+  class RolePermission <<entity>> {
+    +DataScope dataScope
+  }
+  class RoleInherit <<entity>> {
+    +Long seniorRoleId
+    +Long juniorRoleId
+  }
+  class Constraint <<entity>> {
+    +ConstraintType type
+    +int maxUsers
+    +int maxRoles
+  }
+  class ConstraintRole <<entity>> {
+    +Long constraintId
+    +Long roleId
+  }
+}
+package "应用、菜单/按钮、权限与 API" {
+  class Application <<entity>> {
+    +Long id
+    +String code
+    +String name
+  }
+  class AppResource <<entity>> {
+    +Long id
+    +ResourceType type
+    +int menuLevel
+    +boolean grantable
+    +String code
+  }
+  class MenuResource <<entity>> {
+    +String route
+  }
+  class ButtonResource <<entity>> {
+    +String actionCode
+  }
+  class Permission <<entity>> {
+    +Long id
+    +String code
+    +PermissionType type
+  }
+  class ApiEndpoint <<entity>> {
+    +Long id
+    +String operationId
+    +String httpMethod
+    +String pathPattern
+    +PermissionMode mode
+  }
+  class PermissionApiMapping <<entity>> {
+    +String mappingType
+  }
+}
+Application "1" --> "0..*" AppResource : contains
+AppResource <|-- MenuResource
+AppResource <|-- ButtonResource
+MenuResource "0..1" --> "0..*" MenuResource : parent
+MenuResource "1" --> "0..*" ButtonResource : contains
+AppResource "1" --> "0..1" Permission : grants (grantable=1)
+Permission "1" --> "0..*" PermissionApiMapping
+ApiEndpoint "1" --> "0..*" PermissionApiMapping
+Role "1" --> "0..*" RolePermission
+Permission "1" --> "0..*" RolePermission
+User "1" --> "0..*" UserRole
+Role "1" --> "0..*" UserRole
+User "0..*" --> "1" Dept : worksIn
+Dept "0..1" --> "0..*" Dept : parent
+User "0..*" --> "0..1" Dept : administers
+Role "1" --> "0..*" RoleInherit : senior
+Role "1" --> "0..*" RoleInherit : junior
+Constraint "1" --> "0..*" ConstraintRole
+Role "1" --> "0..*" ConstraintRole
+@enduml

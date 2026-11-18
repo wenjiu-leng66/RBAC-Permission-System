@@ -5,13 +5,17 @@ Java 21、Spring Boot 3.3.5、Spring JDBC、MySQL 8.4。沿用成员 4、5 的 C
 ## 本阶段实现
 
 - 工号 / 手机号登录、HttpOnly `JSESSIONID` 会话、退出、首次改密、旧密码验证；账号停用或密码重置后，旧会话的下一次请求返回 401。
+- 登录标识按“单候选”解析：同一登录串同时命中某人工号和另一人手机号时拒绝登录，不随机选择账号；创建/编辑用户时也检查工号与手机号跨列撞值，返回 400 `VALIDATION`。
 - 用户查询、筛选、分页、增改删、启停用、密码重置；删除负责人时清空部门负责人引用。
 - 只读部门树与部门及全部下级人员查询，返回负责人、直接人数、含下级人数。
 - 角色增改删与启停用、角色用户列表、带数据范围的角色授权；内置角色及唯一超级管理员保护。
 - 用户角色 / 角色授权整组替换、版本 CAS、409 冲突、数据库事务回滚。业务角色撤销、角色停用、授权变更在下一次请求生效。
 - 权限取并集，同码范围按 `ALL > DEPT > SELF` 合并；`DEPT` 包含全部下级部门；管理权限映射集中在 `AuthorizationService.managementCodes`。
 - 按查看权限生成门户菜单；功能点返回六种操作与数据范围；员工台账按范围查询，仅允许修改电话、邮箱。角色下用户列表同样按操作者的用户查看范围裁剪。
-- JSON 字段及长度校验、统一错误包络、来源检查和明确的浏览器允许来源配置。没有实现角色继承、约束、角色激活切换或日志审计，这些属于后续阶段。
+- JSON 字段及长度校验、统一错误包络、来源检查和明确的浏览器允许来源配置。
+- 每个请求生成或透传 `X-Request-Id`，写入 MDC 并回写响应头；错误体的 `requestId` 与响应头一致。API、Service、Infrastructure 三层调用由 `LayerLoggingAspect` 统一记录层名、类名、方法名、结果、耗时和异常类型，不记录参数、返回值或敏感值。
+- 每个 Controller 方法带稳定的 `@Operation(operationId=...)`，当前 33 个操作与 OpenAPI 0.3.0 一致；新增或改名必须同步契约，`ControllerOperationIdTest` 会拦截缺失和重名。
+- 没有实现角色继承、约束、角色激活切换或日志审计，这些属于后续阶段。
 
 ## 运行合成演示
 
@@ -25,7 +29,7 @@ mvn package -DskipTests
 java -jar target/rbac-procedural-backend-0.1.0-SNAPSHOT.jar
 ```
 
-`mvn test` 使用独立的内存 H2 和合成口令，不读取本地业务库；当前测试含61项隔离单元和29项整合，共90项通过；覆盖范围见下文。应用默认使用 `h2` 配置，数据保存在当前目录的 `work/rbac-local.mv.db`，重启保留数据。演示初始化仅在空库执行，重复启动不会覆盖用户或密码。修改 `RBAC_INITIAL_PASSWORD` 不会重设已有用户密码。
+`mvn test` 使用独立的内存 H2 和合成口令，不读取本地业务库；当前测试含73项隔离单元和29项整合，共102项通过；覆盖范围见下文。应用默认使用 `h2` 配置，数据保存在当前目录的 `work/rbac-local.mv.db`，重启保留数据。演示初始化仅在空库执行，重复启动不会覆盖用户或密码。修改 `RBAC_INITIAL_PASSWORD` 不会重设已有用户密码。
 
 打开 `http://localhost:8080/swagger-ui/index.html`，登录接口为 `POST /api/v1/auth/login`。所有演示账号初始密码均为启动时注入的值：
 
@@ -69,12 +73,16 @@ java -jar target/rbac-procedural-backend-0.1.0-SNAPSHOT.jar
 | `RBAC_INITIAL_PASSWORD` | 必须在环境中注入；不写进仓库 |
 | `RBAC_ALLOWED_ORIGINS` | 允许携带 Cookie 的开发页面来源，逗号分隔，默认本机 5173 的两个来源 |
 | `SESSION_COOKIE_SECURE` | 本地 HTTP 默认 `false`；公开 HTTPS 使用 `true` |
+| `LOG_LEVEL_API` | API 层日志级别，默认 `DEBUG`；生产可调 `INFO` |
+| `LOG_LEVEL_SERVICE` | Service 层日志级别，默认 `DEBUG`；生产可调 `INFO` |
+| `LOG_LEVEL_INFRASTRUCTURE` | Infrastructure（当前 mapper）层日志级别，默认 `DEBUG`；生产可调 `INFO` |
+| `LOG_LEVEL_ASPECT` | 三层日志切面自身级别，默认 `DEBUG`；设为 `INFO` 只保留异常/系统错误 |
 
 部署支持可信反向代理传来的 Forwarded / X-Forwarded 标头。后端应放在该代理后的私有网络，外部只开放代理端口。单进程内存会话在后端重启后需要重新登录，数据库数据会保留。
 
 ## API 和自测
 
-基础路径 `/api/v1`；业务成功响应直接返回对象 / 分页对象，错误为 `{error:{code,message,requestId,details}}`。分页字段为 `items/page/pageSize/total`，ID 用数字字符串表示，状态为 `ENABLED/DISABLED`，范围为 `ALL/DEPT/SELF`。
+基础路径 `/api/v1`；业务成功响应直接返回对象 / 分页对象，错误为 `{error:{code,message,requestId,details}}`。所有请求响应带 `X-Request-Id`；客户端可传入合法值用于跨系统追踪，服务端会对不安全值重新生成。分页字段为 `items/page/pageSize/total`，ID 用数字字符串表示，状态为 `ENABLED/DISABLED`，范围为 `ALL/DEPT/SELF`。
 
 - 认证与身份：`/auth/login`、`/auth/logout`、`/me`、`/me/password`、`/me/permissions`。
 - 门户和台账：`/portal/menu`、`/portal/functions/{functionCode}`、`/ledger/employees`、`/ledger/employees/{id}`。
@@ -96,7 +104,7 @@ python ../scripts/smoke_http.py --base-url http://localhost:8080
 
 ## 分层单元测试和覆盖率
 
-当前10类隔离测试：`BrowserSecurityConfigTest`、`AuthControllerTest`、`HealthControllerTest`、`AuthorizationServiceTest`、`AuthServiceTest`、`UserServiceTest`、`RoleServiceTest`、`DepartmentMapperTest`、`IdsTest`、`DataInitializerTest`。它们分别验证控制器协作、业务保护/范围/冲突分支、组织遍历/ID边界和合成初始化条件；mock不验证实际SQL、行锁或事务。
+当前14类隔离测试：`BrowserSecurityConfigTest`、`AuthControllerTest`、`HealthControllerTest`、`ControllerOperationIdTest`、`AuthorizationServiceTest`、`AuthServiceTest`、`UserServiceTest`、`RoleServiceTest`、`DepartmentMapperTest`、`IdsTest`、`DataInitializerTest`、`RequestIdFilterTest`、`GlobalExceptionHandlerTest`、`LayerLoggingAspectTest`。它们分别验证控制器协作、operationId 完整性、业务保护/范围/冲突分支、组织遍历/ID边界、合成初始化条件、请求关联标识、错误体 requestId 和三层日志脱敏；mock不验证实际SQL、行锁或事务。
 
 在仓库根目录运行 `mvn -f backend-procedural/pom.xml clean verify`，一并执行61项单元与29项整合测试。打开 `backend-procedural/target/site/jacoco/index.html` 查看实际覆盖率；2026-10-27的行90.89%、分支75.31%及未覆盖部分见[测试报告](../docs/testing/test-report-2026-10-27.md)。助教现场须重新运行，不只展示旧报告。
 

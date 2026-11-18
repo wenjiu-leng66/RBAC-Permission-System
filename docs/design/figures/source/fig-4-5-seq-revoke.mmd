@@ -1,0 +1,28 @@
+sequenceDiagram
+  autonumber
+  actor AD as 超级管理员
+  participant U as 用户浏览器
+  participant N as Nginx
+  participant G as GrantAppService
+  participant A as AuthorizationService
+  participant DB as MySQL
+  participant L as 审计
+  AD->>N: PUT /users/{id}/roles（完整集合 + version）
+  N->>G: 转发请求
+  G->>DB: 校验权限、目标范围、角色可授出性、版本、约束
+  DB-->>G: 当前版本 / 目标用户
+  G->>DB: 事务：替换用户角色、role_version+1、authz_version+1
+  G->>L: 写授权变更日志
+  G-->>N: 200 已保存集合 / 新版本
+  N-->>AD: 保存成功
+  Note over U,A: 用户保持登录，立即发起删除请求
+  U->>N: DELETE /users/{id}（原会话 Cookie）
+  N->>A: 鉴权拦截（operationId）
+  A->>DB: 读取当前 authz_version + 有效权限
+  DB-->>A: 新版本；已无 rbac:user:delete
+  A-->>N: 403 FORBIDDEN
+  N-->>U: 403
+  U->>N: GET /portal/menu（收到 403 后刷新）
+  N->>A: 重新装配菜单
+  A-->>U: 菜单中无“用户管理”
+  A->>L: 写拒绝审计

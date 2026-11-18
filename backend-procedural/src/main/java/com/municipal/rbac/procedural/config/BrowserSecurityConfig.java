@@ -27,7 +27,9 @@ public class BrowserSecurityConfig {
     config.setAllowedOrigins(
         Arrays.stream(configured.split(",")).filter(s -> !s.isBlank()).toList());
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-    config.setAllowedHeaders(List.of("Content-Type", "Accept"));
+    config.setAllowedHeaders(List.of("Content-Type", "Accept", RequestIdFilter.HEADER));
+    // 让浏览器端也能读取服务端生成的关联标识，便于按同一 ID 排查前后端链路。
+    config.setExposedHeaders(List.of(RequestIdFilter.HEADER));
     config.setAllowCredentials(true);
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/api/**", config);
@@ -66,7 +68,7 @@ public class BrowserSecurityConfig {
                       "message",
                       "Origin is not allowed.",
                       "requestId",
-                      UUID.randomUUID().toString(),
+                      RequestIdFilter.currentRequestId(),
                       "details",
                       null)));
           return;

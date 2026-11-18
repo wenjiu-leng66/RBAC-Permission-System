@@ -112,12 +112,20 @@ public class UserService {
 
   /**
    * 提供可读的重复工号/手机错误；并发写仍由数据库唯一约束兜底，统一异常处理再转为 409。
+   *
+   * <p>工号和手机号是两列独立的唯一键，还要检查跨列撞值：新工号不能等于别人手机号，
+   * 新手机号不能等于别人工号，否则同一登录串会解析到多个账号。跨列情况没有数据库唯一键
+   * 兜底，因此这里是业务拒绝；并发创建仍需由导入/运维核对补强。
    */
   private void unique(String username, String phone, String except) {
     if (username != null && users.usernameExists(username))
       throw ApiException.conflict("DUPLICATE_USERNAME", "工号已存在。", null);
     if (users.phoneExists(phone, except))
       throw ApiException.conflict("DUPLICATE_PHONE", "手机号已存在。", null);
+    if (username != null && users.phoneExists(username, except))
+      throw ApiException.badRequest("VALIDATION", "该工号已被其他账号用作手机号，登录标识必须唯一。");
+    if (phone != null && users.usernameExists(phone, except))
+      throw ApiException.badRequest("VALIDATION", "该手机号已被其他账号用作工号，登录标识必须唯一。");
   }
 
   /**

@@ -2,6 +2,7 @@ package com.municipal.rbac.procedural.controller;
 
 import com.municipal.rbac.procedural.dto.Requests;
 import com.municipal.rbac.procedural.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.*;
 import jakarta.validation.Valid;
 import java.util.Map;
@@ -19,6 +20,7 @@ public class AuthController {
     this.auth = auth;
   }
 
+  @Operation(operationId = "post_auth_login")
   @PostMapping("/login")
   public Map<String, Object> login(
       @Valid @RequestBody Requests.Login body, HttpSession session, HttpServletRequest request) {
@@ -28,6 +30,7 @@ public class AuthController {
     return result;
   }
 
+  @Operation(operationId = "post_auth_logout")
   @PostMapping("/logout")
   public Map<String, Object> logout(HttpSession session) {
     auth.logout(session);

@@ -36,7 +36,7 @@ class AuthServiceTest {
   @Test
   void successfulLoginTrimsAccountStoresCredentialVersionAndReturnsSafeView() {
     var user = AuthorizationServiceTest.user("4", "10", true, false, "stored-hash");
-    when(users.findByAccount("U4")).thenReturn(Optional.of(user));
+    when(users.findByAccountCandidates("U4")).thenReturn(List.of(user));
     when(passwords.matches("provided", "stored-hash")).thenReturn(true);
     when(me.me(session)).thenReturn(Map.of("id", "4"));
     when(authorization.effectivePermissions("4")).thenReturn(new EffectivePermissions(List.of(), List.of(), Map.of()));
@@ -49,10 +49,29 @@ class AuthServiceTest {
   }
 
   @Test
+  void ambiguousLoginIdentifierIsRejectedInsteadOfPickingOneAccount() {
+    when(users.findByAccountCandidates("DUP"))
+        .thenReturn(
+            List.of(
+                AuthorizationServiceTest.user("4", "10", true, false, "hash-a"),
+                AuthorizationServiceTest.user("5", "10", true, false, "hash-b")));
+
+    var error =
+        assertThrows(
+            ApiException.class,
+            () -> auth.login(new Requests.Login("DUP", "provided"), session));
+
+    assertEquals("INVALID_CREDENTIALS", error.code());
+    assertNull(session.getAttribute(AuthorizationService.SESSION_USER));
+    verify(passwords).matches("provided", "dummy-hash");
+    verify(users, never()).loginTime(anyString());
+  }
+
+  @Test
   void missingAccountStillRunsSlowHashAndClearsPreviousIdentity() {
     session.setAttribute(AuthorizationService.SESSION_USER, "old-user");
     session.setAttribute(AuthorizationService.SESSION_CREDENTIAL, "old-hash");
-    when(users.findByAccount("missing")).thenReturn(Optional.empty());
+    when(users.findByAccountCandidates("missing")).thenReturn(List.of());
     var error = assertThrows(ApiException.class, () -> auth.login(new Requests.Login("missing", "provided"), session));
     assertEquals("INVALID_CREDENTIALS", error.code());
     assertNull(session.getAttribute(AuthorizationService.SESSION_USER));
@@ -63,10 +82,10 @@ class AuthServiceTest {
 
   @Test
   void disabledAndWrongPasswordAndMalformedHashShareCredentialFailure() {
-    when(users.findByAccount("U4")).thenReturn(Optional.of(AuthorizationServiceTest.user("4", "10", false, false, "stored-hash")));
+    when(users.findByAccountCandidates("U4")).thenReturn(List.of(AuthorizationServiceTest.user("4", "10", false, false, "stored-hash")));
     when(passwords.matches("provided", "stored-hash")).thenReturn(true);
     var disabled = assertThrows(ApiException.class, () -> auth.login(new Requests.Login("U4", "provided"), session));
-    when(users.findByAccount("U4")).thenReturn(Optional.of(AuthorizationServiceTest.user("4", "10", true, false, "stored-hash")));
+    when(users.findByAccountCandidates("U4")).thenReturn(List.of(AuthorizationServiceTest.user("4", "10", true, false, "stored-hash")));
     when(passwords.matches("provided", "stored-hash")).thenReturn(false);
     var wrong = assertThrows(ApiException.class, () -> auth.login(new Requests.Login("U4", "provided"), session));
     when(passwords.matches("provided", "stored-hash")).thenThrow(new IllegalArgumentException("unsupported hash"));

@@ -29,3 +29,15 @@ rbac:
 springdoc:
   swagger-ui:
     query-config-enabled: true
+
+# 三层调用日志由 LayerLoggingAspect 统一输出，业务类不各自散落 log.*。
+# 检查/演示时可保持 DEBUG；生产部署可用环境变量把某一层调到 INFO。
+logging:
+  level:
+    com.municipal.rbac.procedural.controller: ${LOG_LEVEL_API:DEBUG}
+    com.municipal.rbac.procedural.service: ${LOG_LEVEL_SERVICE:DEBUG}
+    com.municipal.rbac.procedural.mapper: ${LOG_LEVEL_INFRASTRUCTURE:DEBUG}
+    # 切面自身在 config 包；不打开这一行，成功/拒绝的 DEBUG 日志不会输出。
+    com.municipal.rbac.procedural.config.LayerLoggingAspect: ${LOG_LEVEL_ASPECT:DEBUG}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{requestId:-}] %logger{40} - %msg%n"

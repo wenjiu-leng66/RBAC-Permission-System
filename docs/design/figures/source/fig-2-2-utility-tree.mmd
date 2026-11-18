@@ -1,0 +1,18 @@
+flowchart LR
+  U(("系统效用"))
+  U --> PERF["性能"]
+  U --> SEC["安全"]
+  U --> AVA["可用性"]
+  U --> MOD["可修改性"]
+  PERF --> P1["P1 用户列表 95% ≤1s<br/>H / M"]
+  PERF --> P2["P2 单次鉴权 ≤10ms<br/>H / H"]
+  PERF --> P3["P3 200 管理员并发<br/>错误率 <0.1%<br/>M / M"]
+  SEC --> S1["S1 撤销后下一次请求 403<br/>H / M"]
+  SEC --> S2["S2 部门管理员越界拒绝<br/>H / M"]
+  SEC --> S3["S3 复制会话调 API 被拒<br/>H / M"]
+  SEC --> S4["S4 未登记 API 默认拒绝<br/>H / L"]
+  AVA --> A1["A1 数据库恢复<br/>RTO ≤5min / RPO ≤15min<br/>M / M"]
+  AVA --> A2["A2 应用重启会话可恢复<br/>M / M"]
+  MOD --> M1["M1 新增按钮/API ≤2 人日<br/>不改表结构<br/>M / L"]
+  MOD --> M2["M2 两套后端契约一致<br/>M / H"]
+  MOD --> M3["M3 有效权限集中可测<br/>H / M"]

@@ -1,5 +1,6 @@
 package com.municipal.rbac.procedural.error;
 
+import com.municipal.rbac.procedural.config.RequestIdFilter;
 import com.municipal.rbac.procedural.vo.ErrorVO;
 import java.util.*;
 import org.slf4j.*;
@@ -87,14 +88,11 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 生成本次错误响应的追踪标识；它不是身份令牌，也不能替代带上下文的服务端请求日志。
+   * 使用请求入口建立的关联标识，使错误响应、API/Service/Infrastructure 日志可以按同一 ID 串联。
+   * 该标识不是身份令牌，也不能替代带上下文的服务端请求日志。
    */
   private ErrorVO body(String code, String message, Map<String, Object> details) {
     return new ErrorVO(
-        new ErrorVO.ErrorBody(
-            code,
-            message,
-            UUID.randomUUID().toString().replace("-", "").substring(0, 12),
-            details));
+        new ErrorVO.ErrorBody(code, message, RequestIdFilter.currentRequestId(), details));
   }
 }

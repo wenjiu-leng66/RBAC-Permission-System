@@ -1,5 +1,6 @@
 package com.municipal.rbac.procedural.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import java.util.Map;
 import org.springframework.boot.availability.*;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ public class HealthController {
     this.availability = availability;
   }
 
+  @Operation(operationId = "get_health")
   @GetMapping("/api/v1/health")
   public ResponseEntity<Map<String, Object>> health() {
     if (availability.getReadinessState() != ReadinessState.ACCEPTING_TRAFFIC)

@@ -1,0 +1,87 @@
+@startuml
+!pragma layout smetana
+top to bottom direction
+skinparam dpi 170
+
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam nodesep 35
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam entity {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #94A3B8
+  FontColor #1F2937
+}
+skinparam component {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam rectangle {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam usecase {
+  BackgroundColor #FFF7E6
+  BorderColor #D6A84B
+  FontColor #1F2937
+}
+skinparam database {
+  BackgroundColor #EAF1FB
+  BorderColor #4A6FA5
+  FontColor #1F2937
+}
+skinparam note {
+  BackgroundColor #FFF7E6
+  BorderColor #D6A84B
+}
+
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+package "客户端" {
+  [浏览器 Chrome / Edge] as B
+  [Vue 3 SPA\n门户 / 管理后台 / 员工台账] as SPA
+}
+package "接入层" {
+  [Nginx\nTLS / 静态资源 / 反向代理] as NG
+  [Spring MVC\nController / DTO / Validation] as MVC
+  [鉴权拦截器\noperationId → 权限 → 数据范围] as INT
+}
+package "应用层（事务边界）" {
+  [11 个业务模块\nidentity / org / user / role / catalog\ngrant / authz / portal / ledger / audit / import] as APP
+}
+package "领域层（纯规则）" {
+  [AuthorizationPolicy / EffectivePermissionCalculator\nApiPermissionResolver / MenuTreeAssembler\nConstraintChecker / ScopeResolver] as DOM
+}
+package "基础设施层" {
+  [Spring Data JPA / Spring Session JDBC\nCaffeine 版本键缓存 / Flyway / 离线导入 CLI] as INF
+}
+database "MySQL 8.4\n业务 / 会话 / 日志" as DB
+B --> SPA
+SPA --> NG
+NG --> MVC
+MVC --> INT
+INT --> APP
+APP --> DOM
+APP --> INF
+INF --> DB
+note bottom of APP
+  两套后端实现：
+  backend-procedural（面向功能）
+  backend-oo（面向对象）
+  同一 OpenAPI / 同一表结构
+end note
+@enduml

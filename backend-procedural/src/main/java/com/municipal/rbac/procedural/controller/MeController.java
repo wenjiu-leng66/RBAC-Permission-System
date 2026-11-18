@@ -2,6 +2,7 @@ package com.municipal.rbac.procedural.controller;
 
 import com.municipal.rbac.procedural.dto.Requests;
 import com.municipal.rbac.procedural.service.*;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.util.Map;
@@ -21,16 +22,19 @@ public class MeController {
     this.auth = auth;
   }
 
+  @Operation(operationId = "get_me")
   @GetMapping
   public Map<String, Object> me(HttpSession session) {
     return me.me(session);
   }
 
+  @Operation(operationId = "get_me_permissions")
   @GetMapping("/permissions")
   public Map<String, Object> permissions(HttpSession session) {
     return me.permissions(session);
   }
 
+  @Operation(operationId = "patch_me_password")
   @PatchMapping("/password")
   public Map<String, Object> password(
       @Valid @RequestBody Requests.Password body, HttpSession session) {
